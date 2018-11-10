@@ -1,345 +1,255 @@
 // Define a grammar called Hello
-grammar
-Hello;
+grammar Hello;
 // GRAMMAR FOR I LANGUAGE
 
 // starting point of parsing
 program
-    : {
-    SimpleDeclaration | RoutineDeclaration
-}
-;
+    : (simpleDeclaration eos|routineDeclaration eos)*
+    ;
 
-SimpleDeclaration
-    : VariableDeclaration(NewLine | ';')
-| TypeDeclaration(NewLine | ';')
-;
+simpleDeclaration
+    : variableDeclaration
+    | typeDeclaration
+    ;
 
-VariableDeclaration
-    : 'var'
-Identifier
-':'
-Type ['is'
-Expression
-]
-|
-'var'
-Identifier
-'is'
-Expression
-;
+variableDeclaration
+    : 'var' Identifier ':' type ( 'is' expression )?
+    | 'var' Identifier'is'expression
+    ;
 
-TypeDeclaration
-    : 'type'
-Identifier
-'is'
-Type
-;
+typeDeclaration
+    : 'type' Identifier 'is' type
+    ;
 
-Type
-    : PrimitiveType
-| UserType
-| Identifier
-;
+type
+    : primitiveType
+    | userType
+    | Identifier
+    ;
 
-PrimitiveType
+primitiveType
     : 'integer'
-| 'real'
-| 'boolean'
-;
+    | 'real'
+    | 'boolean'
+    ;
 
-UserType
-    : ArrayType
-| RecordType
-;
+userType
+    : arrayType
+    | recordType
+    ;
 
-RecordType
-    : 'record'
-{
-    VariableDeclaration
-}
-'end'
-;
+recordType
+    : 'record' ( variableDeclaration )* 'end';
 
-ArrayType
-    : 'array'
-'['
-Expression
-']'
-Type
-;
+arrayType
+    : 'array' '[' expression ']' type
+    ;
 
-Statement
-    : Assignment
-| RoutineCall
-| WhileLoop
-| ForLoop
-| IfStatement
-;
+statement
+    : assignment
+    | routineCall
+    | whileLoop
+    | forLoop
+    | ifStatement
+    ;
 
-Assignment
-    : ModifiablePrimary
-':='
-Expression
-;
+assignment
+    : modifiablePrimary ':=' expression;
 
-RoutineCall
-    : Identifier ['('
-Expression
-{
-    ','
-    Expression
-}
-')'
-]
-;
+routineCall
+    : Identifier ('(' expression ( ',' expression )* ')' )?
+    ;
 
-WhileLoop
-    : 'while'
-Expression
-'loop'
-Body
-'end'
-;
+whileLoop
+    : 'while' expression 'loop' body 'end'
+    ;
 
-ForLoop
-    : 'for'
-Identifier
-'in' ['reverse']
-Range
-'loop'
-Body
-'end'
-;
+forLoop
+    : 'for' Identifier 'in' ('reverse')? range 'loop' body 'end'
+    ;
 
-Range
-    : Expression
-'..'
-Expression
-;
+range
+    : expression '..' expression
+    ;
 
-IfStatement
-    : 'if'
-Expression
-'then'
-Body ['else'
-Body
-]
-'end'
-;
+ifStatement
+    : 'if' expression 'then' body ('else' body )? 'end'
+    ;
 
-RoutineDeclaration
-    : 'routine'
-Identifier [Parameters] [':'
-Type
-]
-['is' Body 'end']
-;
+routineDeclaration
+    : 'routine' Identifier (parameters)? (':' type )? ('is' body 'end')?
+    ;
 
-Parameters
-    : '('
-ParameterDeclaration
-{
-    ','
-    ParameterDeclaration
-}
-')'
-;
+parameters
+    : '(' parameterDeclaration ( ',' parameterDeclaration )* ')'
+    ;
 
-ParameterDeclaration
-    : Identifier
-':'
-Type
-;
+parameterDeclaration
+    : Identifier ':' type
+    ;
+
+body
+    : ( simpleDeclaration | statement )*
+    ;
+
+expression
+    : relation ( ('and' | 'or' | 'xor') relation )*
+    ;
+
+relation
+    : simple (('<' | '<=' | '>' | '>=' | '=' | '/=') simple )?
+    ;
+
+simple
+    : factor ( ('*' | '/' | '%') factor )*
+    ;
+
+factor
+    : summand ( ('+' | '-') summand )*
+    ;
+
+summand
+    : primary
+    | '(' expression ')'
+    ;
+
+primary
+    : ( ('+' | '-') | 'not')? IntegerLiteral
+    | ('+' | '-')? RealLiteral
+    | 'true'
+    | 'false'
+    | modifiablePrimary
+    | routineCall
+    ;
 
 
-Body
-    : {
-    SimpleDeclaration | Statement
-}
-;
+modifiablePrimary
+    : Identifier ( '.' Identifier | '[' expression ']' )*
+    ;
 
-Expression
-    : Relation
-{
-    ('and' | 'or' | 'xor')
-    Relation
-}
-;
-
-Relation
-    : Simple [('<' | '<=' | '>' | '>=' | '=' | '/=')
-Simple
-]
-;
-
-Simple
-    : Factor
-{
-    ('*' | '/' | '%')
-    Factor
-}
-;
-Factor
-    : Summand
-{
-    ('+' | '-')
-    Summand
-}
-;
-
-Summand
-    : Primary
-| '('
-Expression
-')'
-;
-
-Primary
-    : [Sign | 'not']
-IntegerLiteral
-| [Sign]
-RealLiteral
-| 'true'
-| 'false'
-| ModifiablePrimary
-| RoutineCall
-;
-
-Sign
-    : '+'
-| '-'
-;
-
-ModifiablePrimary
-    : Identifier
-{
-    '.'
-    Identifier | '['
-    Expression
-    ']'
-}
-;
+eos
+    : ';'
+    | EOF
+    ;
 
 
 // TOKENS FOR LEXER
 
+
+fragment Sign
+    : '+'
+    | '-'
+    ;
+
 Identifier
-    : Letter(Letter | DecimalDigit) *
-;
+    : Letter(Letter | DecimalDigit)*
+    ;
 
 Keyword
     : 'var'
-| 'is'
-| 'type'
-| 'record'
-| 'end'
-| 'array'
-| 'while'
-| 'loop'
-| 'for'
-| 'in'
-| 'reverse'
-| 'if'
-| 'then'
-| 'else'
-| 'not'
-;
+    | 'is'
+    | 'type'
+    | 'record'
+    | 'end'
+    | 'array'
+    | 'while'
+    | 'loop'
+    | 'for'
+    | 'in'
+    | 'reverse'
+    | 'if'
+    | 'then'
+    | 'else'
+    | 'not'
+    ;
 
-fragment
-Letter
+fragment Letter
     : UnicodeLetter
-| '_'
-;
+    | '_'
+    ;
 
-fragment
-UnicodeLetter
-    :[a - zA - Z]
-;
+fragment UnicodeLetter
+    :[a-zA-Z]
+    ;
 
 BinaryOperator
     : 'and'
-| 'or'
-| 'xor'
-| RelationalOperator
-| MultiplicationOperator
-| AdditionOperator
-;
+    | 'or'
+    | 'xor'
+    | RelationalOperator
+    | MultiplicationOperator
+    | AdditionOperator
+    ;
 
 RelationalOperator
     : '<'
-| '<='
-| '>'
-| '>='
-| '='
-| '/='
-;
+    | '<='
+    | '>'
+    | '>='
+    | '='
+    | '/='
+    ;
 
 MultiplicationOperator
     :  '*'
-| '/'
-| '%'
-;
+    | '/'
+    | '%'
+    ;
 
 AdditionOperator
-    :  '+'
-| '-'
-;
+    : '+'
+    | '-'
+    ;
 
 IntegerLiteral
     : DecimalLiteral
-| HexLiteral
-;
+    | HexLiteral
+    ;
 
 RealLiteral
-    : Decimals
-'.'
-Decimals ? Exponent ?
-|
-Decimals
-Exponent
-| '.'
-Decimals
-Exponent ?
-;
+    : Decimals '.' Decimals ? Exponent ?
+    | Decimals Exponent
+    | '.' Decimals Exponent ?
+    ;
 
-fragment
-Decimals
-    : DecimalDigit +
-;
+fragment Decimals
+    : DecimalDigit+
+    ;
 
-fragment
-Exponent
+fragment Exponent
     : ('e' | 'E')('+' | '-') ? Decimals
-;
+    ;
 
-fragment
-DecimalLiteral
-    : [1 - 9]
-DecimalDigit *
-;
+fragment DecimalLiteral
+    : [1-9]DecimalDigit*
+    ;
 
-fragment
-HexLiteral
-    : '0'('x' | 'X')
-HexDigit +
-;
+fragment HexLiteral
+    : '0'('x' | 'X') HexDigit+
+    ;
 
-fragment
-DecimalDigit
-    : [0 - 9]
-;
+fragment DecimalDigit
+    : [0-9]
+    ;
 
-fragment
-HexDigit
-    : [0 - 9a - fA - F]
-;
+fragment HexDigit
+    : [0-9a-fA-F]
+    ;
 
-fragment
-NewLine
-    : [\n
-]
-;
+WHITE_SPACE  :  [ \t]+ -> channel(HIDDEN)
+    ;
+
+COMMENT // Multiline
+    :   '/*' .*? '*/' -> channel(HIDDEN)
+    ;
+
+LINE_COMMENT // Single line
+    :   '//' ~[\r\n]* -> skip
+    ;
+
+TERMINATOR
+	: [\r\n]+ -> channel(HIDDEN)
+	;
 
 //
 // > skip ; // skip spaces, tabs, newlines
