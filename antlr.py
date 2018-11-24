@@ -14,7 +14,7 @@ def main():
     lexer = HelloLexer(FileStream('in.txt'))
     stream = CommonTokenStream(lexer)
     parser = HelloParser(stream)
-    tree = parser.hi()
+    tree = parser.program()
     printer = HelloPrintListener()
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
