@@ -1,1 +1,4 @@
-var a: integer; var b: integer;
+routine kek is
+    a := 3
+    var a: integer
+end;

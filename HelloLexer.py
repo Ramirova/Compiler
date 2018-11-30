@@ -1,4 +1,4 @@
-# Generated from Hello.g4 by ANTLR 4.7.1
+# Generated from /Users/anastasia/PycharmProjects/Compiler/Hello.g4 by ANTLR 4.7
 # encoding: utf-8
 from __future__ import print_function
 from antlr4 import *
@@ -337,7 +337,7 @@ class HelloLexer(Lexer):
 
     def __init__(self, input=None, output=sys.stdout):
         super(HelloLexer, self).__init__(input, output=output)
-        self.checkVersion("4.7.1")
+        self.checkVersion("4.7")
         self._interp = LexerATNSimulator(self, self.atn, self.decisionsToDFA, PredictionContextCache())
         self._actions = None
         self._predicates = None

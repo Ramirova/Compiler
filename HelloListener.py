@@ -1,4 +1,4 @@
-# Generated from Hello.g4 by ANTLR 4.7.1
+# Generated from /Users/anastasia/PycharmProjects/Compiler/Hello.g4 by ANTLR 4.7
 from antlr4 import *
 
 # This class defines a complete listener for a parse tree produced by HelloParser.
@@ -40,12 +40,12 @@ class HelloListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by HelloParser#type.
-    def enterType(self, ctx):
+    # Enter a parse tree produced by HelloParser#lang_type.
+    def enterLang_type(self, ctx):
         pass
 
-    # Exit a parse tree produced by HelloParser#type.
-    def exitType(self, ctx):
+    # Exit a parse tree produced by HelloParser#lang_type.
+    def exitLang_type(self, ctx):
         pass
 
 
@@ -130,12 +130,12 @@ class HelloListener(ParseTreeListener):
         pass
 
 
-    # Enter a parse tree produced by HelloParser#range.
-    def enterRange(self, ctx):
+    # Enter a parse tree produced by HelloParser#lang_range.
+    def enterLang_range(self, ctx):
         pass
 
-    # Exit a parse tree produced by HelloParser#range.
-    def exitRange(self, ctx):
+    # Exit a parse tree produced by HelloParser#lang_range.
+    def exitLang_range(self, ctx):
         pass
 
 
