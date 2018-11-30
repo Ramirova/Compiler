@@ -13,15 +13,15 @@ simpleDeclaration
     ;
 
 variableDeclaration
-    : 'var' Identifier ':' type ( 'is' expression )?
+    : 'var' Identifier ':' lang_type ( 'is' expression )?
     | 'var' Identifier'is'expression
     ;
 
 typeDeclaration
-    : 'type' Identifier 'is' type
+    : 'type' Identifier 'is' lang_type
     ;
 
-type
+lang_type
     : primitiveType
     | userType
     | Identifier
@@ -42,7 +42,7 @@ recordType
     : 'record' ( variableDeclaration )* 'end';
 
 arrayType
-    : 'array' '[' expression ']' type
+    : 'array' '[' expression ']' lang_type
     ;
 
 statement
@@ -65,10 +65,10 @@ whileLoop
     ;
 
 forLoop
-    : 'for' Identifier 'in' ('reverse')? range 'loop' body 'end'
+    : 'for' Identifier 'in' ('reverse')? lang_range 'loop' body 'end'
     ;
 
-range
+lang_range
     : expression '..' expression
     ;
 
@@ -77,7 +77,7 @@ ifStatement
     ;
 
 routineDeclaration
-    : 'routine' Identifier (parameters)? (':' type )? ('is' body 'end')?
+    : 'routine' Identifier (parameters)? (':' lang_type )? ('is' body 'end')?
     ;
 
 parameters
@@ -85,7 +85,7 @@ parameters
     ;
 
 parameterDeclaration
-    : Identifier ':' type
+    : Identifier ':' lang_type
     ;
 
 body
