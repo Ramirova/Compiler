@@ -6,8 +6,8 @@ import sys
 
 
 class HelloPrintListener(HelloListener):
-    def enterHi(self, ctx):
-        print("Hello: %s" % ctx.ID())
+    def enterProgram(self, ctx):
+        print(ctx.simpleDeclaration())
 
 
 def main():

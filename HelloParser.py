@@ -5,6 +5,7 @@ from antlr4 import *
 from io import StringIO
 import sys
 
+
 def serializedATN():
     with StringIO() as buf:
         buf.write(u"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3")
@@ -132,41 +133,40 @@ def serializedATN():
         return buf.getvalue()
 
 
-class HelloParser ( Parser ):
-
+class HelloParser(Parser):
     grammarFileName = "Hello.g4"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
-    decisionsToDFA = [ DFA(ds, i) for i, ds in enumerate(atn.decisionToState) ]
+    decisionsToDFA = [DFA(ds, i) for i, ds in enumerate(atn.decisionToState)]
 
     sharedContextCache = PredictionContextCache()
 
-    literalNames = [ u"<INVALID>", u"'var'", u"':'", u"'is'", u"'type'", 
-                     u"'integer'", u"'real'", u"'boolean'", u"'record'", 
-                     u"'end'", u"'array'", u"'['", u"']'", u"':='", u"'('", 
-                     u"','", u"')'", u"'while'", u"'loop'", u"'for'", u"'in'", 
-                     u"'reverse'", u"'..'", u"'if'", u"'then'", u"'else'", 
-                     u"'routine'", u"'and'", u"'or'", u"'xor'", u"'<'", 
-                     u"'<='", u"'>'", u"'>='", u"'='", u"'/='", u"'*'", 
-                     u"'/'", u"'%'", u"'+'", u"'-'", u"'not'", u"'true'", 
-                     u"'false'", u"'.'", u"';'" ]
+    literalNames = [u"<INVALID>", u"'var'", u"':'", u"'is'", u"'type'",
+                    u"'integer'", u"'real'", u"'boolean'", u"'record'",
+                    u"'end'", u"'array'", u"'['", u"']'", u"':='", u"'('",
+                    u"','", u"')'", u"'while'", u"'loop'", u"'for'", u"'in'",
+                    u"'reverse'", u"'..'", u"'if'", u"'then'", u"'else'",
+                    u"'routine'", u"'and'", u"'or'", u"'xor'", u"'<'",
+                    u"'<='", u"'>'", u"'>='", u"'='", u"'/='", u"'*'",
+                    u"'/'", u"'%'", u"'+'", u"'-'", u"'not'", u"'true'",
+                    u"'false'", u"'.'", u"';'"]
 
-    symbolicNames = [ u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>", 
-                      u"<INVALID>", u"<INVALID>", u"Identifier", u"Keyword", 
-                      u"BinaryOperator", u"RelationalOperator", u"MultiplicationOperator", 
-                      u"AdditionOperator", u"IntegerLiteral", u"RealLiteral", 
-                      u"WHITE_SPACE", u"COMMENT", u"LINE_COMMENT", u"TERMINATOR" ]
+    symbolicNames = [u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"<INVALID>", u"<INVALID>",
+                     u"<INVALID>", u"<INVALID>", u"Identifier", u"Keyword",
+                     u"BinaryOperator", u"RelationalOperator", u"MultiplicationOperator",
+                     u"AdditionOperator", u"IntegerLiteral", u"RealLiteral",
+                     u"WHITE_SPACE", u"COMMENT", u"LINE_COMMENT", u"TERMINATOR"]
 
     RULE_program = 0
     RULE_simpleDeclaration = 1
@@ -197,80 +197,78 @@ class HelloParser ( Parser ):
     RULE_modifiablePrimary = 26
     RULE_eos = 27
 
-    ruleNames =  [ u"program", u"simpleDeclaration", u"variableDeclaration", 
-                   u"typeDeclaration", u"type", u"primitiveType", u"userType", 
-                   u"recordType", u"arrayType", u"statement", u"assignment", 
-                   u"routineCall", u"whileLoop", u"forLoop", u"range", u"ifStatement", 
-                   u"routineDeclaration", u"parameters", u"parameterDeclaration", 
-                   u"body", u"expression", u"relation", u"simple", u"factor", 
-                   u"summand", u"primary", u"modifiablePrimary", u"eos" ]
+    ruleNames = [u"program", u"simpleDeclaration", u"variableDeclaration",
+                 u"typeDeclaration", u"type", u"primitiveType", u"userType",
+                 u"recordType", u"arrayType", u"statement", u"assignment",
+                 u"routineCall", u"whileLoop", u"forLoop", u"range", u"ifStatement",
+                 u"routineDeclaration", u"parameters", u"parameterDeclaration",
+                 u"body", u"expression", u"relation", u"simple", u"factor",
+                 u"summand", u"primary", u"modifiablePrimary", u"eos"]
 
     EOF = Token.EOF
-    T__0=1
-    T__1=2
-    T__2=3
-    T__3=4
-    T__4=5
-    T__5=6
-    T__6=7
-    T__7=8
-    T__8=9
-    T__9=10
-    T__10=11
-    T__11=12
-    T__12=13
-    T__13=14
-    T__14=15
-    T__15=16
-    T__16=17
-    T__17=18
-    T__18=19
-    T__19=20
-    T__20=21
-    T__21=22
-    T__22=23
-    T__23=24
-    T__24=25
-    T__25=26
-    T__26=27
-    T__27=28
-    T__28=29
-    T__29=30
-    T__30=31
-    T__31=32
-    T__32=33
-    T__33=34
-    T__34=35
-    T__35=36
-    T__36=37
-    T__37=38
-    T__38=39
-    T__39=40
-    T__40=41
-    T__41=42
-    T__42=43
-    T__43=44
-    T__44=45
-    Identifier=46
-    Keyword=47
-    BinaryOperator=48
-    RelationalOperator=49
-    MultiplicationOperator=50
-    AdditionOperator=51
-    IntegerLiteral=52
-    RealLiteral=53
-    WHITE_SPACE=54
-    COMMENT=55
-    LINE_COMMENT=56
-    TERMINATOR=57
+    T__0 = 1
+    T__1 = 2
+    T__2 = 3
+    T__3 = 4
+    T__4 = 5
+    T__5 = 6
+    T__6 = 7
+    T__7 = 8
+    T__8 = 9
+    T__9 = 10
+    T__10 = 11
+    T__11 = 12
+    T__12 = 13
+    T__13 = 14
+    T__14 = 15
+    T__15 = 16
+    T__16 = 17
+    T__17 = 18
+    T__18 = 19
+    T__19 = 20
+    T__20 = 21
+    T__21 = 22
+    T__22 = 23
+    T__23 = 24
+    T__24 = 25
+    T__25 = 26
+    T__26 = 27
+    T__27 = 28
+    T__28 = 29
+    T__29 = 30
+    T__30 = 31
+    T__31 = 32
+    T__32 = 33
+    T__33 = 34
+    T__34 = 35
+    T__35 = 36
+    T__36 = 37
+    T__37 = 38
+    T__38 = 39
+    T__39 = 40
+    T__40 = 41
+    T__41 = 42
+    T__42 = 43
+    T__43 = 44
+    T__44 = 45
+    Identifier = 46
+    Keyword = 47
+    BinaryOperator = 48
+    RelationalOperator = 49
+    MultiplicationOperator = 50
+    AdditionOperator = 51
+    IntegerLiteral = 52
+    RealLiteral = 53
+    WHITE_SPACE = 54
+    COMMENT = 55
+    LINE_COMMENT = 56
+    TERMINATOR = 57
 
     def __init__(self, input, output=sys.stdout):
         super(HelloParser, self).__init__(input, output=output)
         self.checkVersion("4.7.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
-
-
 
     class ProgramContext(ParserRuleContext):
 
@@ -282,22 +280,19 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.SimpleDeclarationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.SimpleDeclarationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.SimpleDeclarationContext, i)
 
         def eos(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.EosContext)
             else:
-                return self.getTypedRuleContext(HelloParser.EosContext,i)
-
+                return self.getTypedRuleContext(HelloParser.EosContext, i)
 
         def routineDeclaration(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.RoutineDeclarationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.RoutineDeclarationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.RoutineDeclarationContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_program
@@ -310,20 +305,18 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitProgram"):
                 listener.exitProgram(self)
 
-
-
-
     def program(self):
 
         localctx = HelloParser.ProgramContext(self, self._ctx, self.state)
         self.enterRule(localctx, 0, self.RULE_program)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 64
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__0) | (1 << HelloParser.T__3) | (1 << HelloParser.T__25))) != 0):
+            while (((_la) & ~0x3f) == 0 and (
+                    (1 << _la) & ((1 << HelloParser.T__0) | (1 << HelloParser.T__3) | (1 << HelloParser.T__25))) != 0):
                 self.state = 62
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
@@ -361,12 +354,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def variableDeclaration(self):
-            return self.getTypedRuleContext(HelloParser.VariableDeclarationContext,0)
-
+            return self.getTypedRuleContext(HelloParser.VariableDeclarationContext, 0)
 
         def typeDeclaration(self):
-            return self.getTypedRuleContext(HelloParser.TypeDeclarationContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeDeclarationContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_simpleDeclaration
@@ -378,9 +369,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitSimpleDeclaration"):
                 listener.exitSimpleDeclaration(self)
-
-
-
 
     def simpleDeclaration(self):
 
@@ -421,12 +409,10 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.Identifier, 0)
 
         def type(self):
-            return self.getTypedRuleContext(HelloParser.TypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeContext, 0)
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_variableDeclaration
@@ -439,18 +425,15 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitVariableDeclaration"):
                 listener.exitVariableDeclaration(self)
 
-
-
-
     def variableDeclaration(self):
 
         localctx = HelloParser.VariableDeclarationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 4, self.RULE_variableDeclaration)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 83
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,4,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 4, self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 71
@@ -464,12 +447,11 @@ class HelloParser ( Parser ):
                 self.state = 77
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==HelloParser.T__2:
+                if _la == HelloParser.T__2:
                     self.state = 75
                     self.match(HelloParser.T__2)
                     self.state = 76
                     self.expression()
-
 
                 pass
 
@@ -504,8 +486,7 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.Identifier, 0)
 
         def type(self):
-            return self.getTypedRuleContext(HelloParser.TypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_typeDeclaration
@@ -517,9 +498,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitTypeDeclaration"):
                 listener.exitTypeDeclaration(self)
-
-
-
 
     def typeDeclaration(self):
 
@@ -550,12 +528,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def primitiveType(self):
-            return self.getTypedRuleContext(HelloParser.PrimitiveTypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.PrimitiveTypeContext, 0)
 
         def userType(self):
-            return self.getTypedRuleContext(HelloParser.UserTypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.UserTypeContext, 0)
 
         def Identifier(self):
             return self.getToken(HelloParser.Identifier, 0)
@@ -570,9 +546,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitType"):
                 listener.exitType(self)
-
-
-
 
     def type(self):
 
@@ -614,7 +587,6 @@ class HelloParser ( Parser ):
             super(HelloParser.PrimitiveTypeContext, self).__init__(parent, invokingState)
             self.parser = parser
 
-
         def getRuleIndex(self):
             return HelloParser.RULE_primitiveType
 
@@ -626,19 +598,17 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitPrimitiveType"):
                 listener.exitPrimitiveType(self)
 
-
-
-
     def primitiveType(self):
 
         localctx = HelloParser.PrimitiveTypeContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_primitiveType)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 95
             _la = self._input.LA(1)
-            if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__4) | (1 << HelloParser.T__5) | (1 << HelloParser.T__6))) != 0)):
+            if not ((((_la) & ~0x3f) == 0 and (
+                    (1 << _la) & ((1 << HelloParser.T__4) | (1 << HelloParser.T__5) | (1 << HelloParser.T__6))) != 0)):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -658,12 +628,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def arrayType(self):
-            return self.getTypedRuleContext(HelloParser.ArrayTypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ArrayTypeContext, 0)
 
         def recordType(self):
-            return self.getTypedRuleContext(HelloParser.RecordTypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.RecordTypeContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_userType
@@ -675,9 +643,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitUserType"):
                 listener.exitUserType(self)
-
-
-
 
     def userType(self):
 
@@ -718,8 +683,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.VariableDeclarationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.VariableDeclarationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.VariableDeclarationContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_recordType
@@ -732,14 +696,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitRecordType"):
                 listener.exitRecordType(self)
 
-
-
-
     def recordType(self):
 
         localctx = HelloParser.RecordTypeContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_recordType)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 101
@@ -747,7 +708,7 @@ class HelloParser ( Parser ):
             self.state = 105
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==HelloParser.T__0:
+            while _la == HelloParser.T__0:
                 self.state = 102
                 self.variableDeclaration()
                 self.state = 107
@@ -771,12 +732,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def type(self):
-            return self.getTypedRuleContext(HelloParser.TypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_arrayType
@@ -788,9 +747,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitArrayType"):
                 listener.exitArrayType(self)
-
-
-
 
     def arrayType(self):
 
@@ -823,24 +779,19 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def assignment(self):
-            return self.getTypedRuleContext(HelloParser.AssignmentContext,0)
-
+            return self.getTypedRuleContext(HelloParser.AssignmentContext, 0)
 
         def routineCall(self):
-            return self.getTypedRuleContext(HelloParser.RoutineCallContext,0)
-
+            return self.getTypedRuleContext(HelloParser.RoutineCallContext, 0)
 
         def whileLoop(self):
-            return self.getTypedRuleContext(HelloParser.WhileLoopContext,0)
-
+            return self.getTypedRuleContext(HelloParser.WhileLoopContext, 0)
 
         def forLoop(self):
-            return self.getTypedRuleContext(HelloParser.ForLoopContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ForLoopContext, 0)
 
         def ifStatement(self):
-            return self.getTypedRuleContext(HelloParser.IfStatementContext,0)
-
+            return self.getTypedRuleContext(HelloParser.IfStatementContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_statement
@@ -853,9 +804,6 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitStatement"):
                 listener.exitStatement(self)
 
-
-
-
     def statement(self):
 
         localctx = HelloParser.StatementContext(self, self._ctx, self.state)
@@ -863,7 +811,7 @@ class HelloParser ( Parser ):
         try:
             self.state = 121
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,8,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 8, self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 116
@@ -910,12 +858,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def modifiablePrimary(self):
-            return self.getTypedRuleContext(HelloParser.ModifiablePrimaryContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ModifiablePrimaryContext, 0)
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_assignment
@@ -927,9 +873,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitAssignment"):
                 listener.exitAssignment(self)
-
-
-
 
     def assignment(self):
 
@@ -964,8 +907,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.ExpressionContext)
             else:
-                return self.getTypedRuleContext(HelloParser.ExpressionContext,i)
-
+                return self.getTypedRuleContext(HelloParser.ExpressionContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_routineCall
@@ -978,14 +920,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitRoutineCall"):
                 listener.exitRoutineCall(self)
 
-
-
-
     def routineCall(self):
 
         localctx = HelloParser.RoutineCallContext(self, self._ctx, self.state)
         self.enterRule(localctx, 22, self.RULE_routineCall)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 127
@@ -993,7 +932,7 @@ class HelloParser ( Parser ):
             self.state = 139
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__13:
+            if _la == HelloParser.T__13:
                 self.state = 128
                 self.match(HelloParser.T__13)
                 self.state = 129
@@ -1001,7 +940,7 @@ class HelloParser ( Parser ):
                 self.state = 134
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                while _la==HelloParser.T__14:
+                while _la == HelloParser.T__14:
                     self.state = 130
                     self.match(HelloParser.T__14)
                     self.state = 131
@@ -1029,12 +968,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def body(self):
-            return self.getTypedRuleContext(HelloParser.BodyContext,0)
-
+            return self.getTypedRuleContext(HelloParser.BodyContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_whileLoop
@@ -1046,9 +983,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitWhileLoop"):
                 listener.exitWhileLoop(self)
-
-
-
 
     def whileLoop(self):
 
@@ -1084,12 +1018,10 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.Identifier, 0)
 
         def range(self):
-            return self.getTypedRuleContext(HelloParser.RangeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.RangeContext, 0)
 
         def body(self):
-            return self.getTypedRuleContext(HelloParser.BodyContext,0)
-
+            return self.getTypedRuleContext(HelloParser.BodyContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_forLoop
@@ -1102,14 +1034,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitForLoop"):
                 listener.exitForLoop(self)
 
-
-
-
     def forLoop(self):
 
         localctx = HelloParser.ForLoopContext(self, self._ctx, self.state)
         self.enterRule(localctx, 26, self.RULE_forLoop)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 147
@@ -1121,10 +1050,9 @@ class HelloParser ( Parser ):
             self.state = 151
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__20:
+            if _la == HelloParser.T__20:
                 self.state = 150
                 self.match(HelloParser.T__20)
-
 
             self.state = 153
             self.range()
@@ -1152,8 +1080,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.ExpressionContext)
             else:
-                return self.getTypedRuleContext(HelloParser.ExpressionContext,i)
-
+                return self.getTypedRuleContext(HelloParser.ExpressionContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_range
@@ -1165,9 +1092,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitRange"):
                 listener.exitRange(self)
-
-
-
 
     def range(self):
 
@@ -1196,15 +1120,13 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def body(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.BodyContext)
             else:
-                return self.getTypedRuleContext(HelloParser.BodyContext,i)
-
+                return self.getTypedRuleContext(HelloParser.BodyContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_ifStatement
@@ -1217,14 +1139,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitIfStatement"):
                 listener.exitIfStatement(self)
 
-
-
-
     def ifStatement(self):
 
         localctx = HelloParser.IfStatementContext(self, self._ctx, self.state)
         self.enterRule(localctx, 30, self.RULE_ifStatement)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 162
@@ -1238,12 +1157,11 @@ class HelloParser ( Parser ):
             self.state = 168
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__24:
+            if _la == HelloParser.T__24:
                 self.state = 166
                 self.match(HelloParser.T__24)
                 self.state = 167
                 self.body()
-
 
             self.state = 170
             self.match(HelloParser.T__8)
@@ -1265,16 +1183,13 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.Identifier, 0)
 
         def parameters(self):
-            return self.getTypedRuleContext(HelloParser.ParametersContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ParametersContext, 0)
 
         def type(self):
-            return self.getTypedRuleContext(HelloParser.TypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeContext, 0)
 
         def body(self):
-            return self.getTypedRuleContext(HelloParser.BodyContext,0)
-
+            return self.getTypedRuleContext(HelloParser.BodyContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_routineDeclaration
@@ -1287,14 +1202,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitRoutineDeclaration"):
                 listener.exitRoutineDeclaration(self)
 
-
-
-
     def routineDeclaration(self):
 
         localctx = HelloParser.RoutineDeclarationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 32, self.RULE_routineDeclaration)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 172
@@ -1304,25 +1216,23 @@ class HelloParser ( Parser ):
             self.state = 175
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__13:
+            if _la == HelloParser.T__13:
                 self.state = 174
                 self.parameters()
-
 
             self.state = 179
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__1:
+            if _la == HelloParser.T__1:
                 self.state = 177
                 self.match(HelloParser.T__1)
                 self.state = 178
                 self.type()
 
-
             self.state = 185
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__2:
+            if _la == HelloParser.T__2:
                 self.state = 181
                 self.match(HelloParser.T__2)
                 self.state = 182
@@ -1349,8 +1259,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.ParameterDeclarationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.ParameterDeclarationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.ParameterDeclarationContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_parameters
@@ -1363,14 +1272,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitParameters"):
                 listener.exitParameters(self)
 
-
-
-
     def parameters(self):
 
         localctx = HelloParser.ParametersContext(self, self._ctx, self.state)
         self.enterRule(localctx, 34, self.RULE_parameters)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 187
@@ -1380,7 +1286,7 @@ class HelloParser ( Parser ):
             self.state = 193
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==HelloParser.T__14:
+            while _la == HelloParser.T__14:
                 self.state = 189
                 self.match(HelloParser.T__14)
                 self.state = 190
@@ -1409,8 +1315,7 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.Identifier, 0)
 
         def type(self):
-            return self.getTypedRuleContext(HelloParser.TypeContext,0)
-
+            return self.getTypedRuleContext(HelloParser.TypeContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_parameterDeclaration
@@ -1422,9 +1327,6 @@ class HelloParser ( Parser ):
         def exitRule(self, listener):
             if hasattr(listener, "exitParameterDeclaration"):
                 listener.exitParameterDeclaration(self)
-
-
-
 
     def parameterDeclaration(self):
 
@@ -1456,15 +1358,13 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.SimpleDeclarationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.SimpleDeclarationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.SimpleDeclarationContext, i)
 
         def statement(self, i=None):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.StatementContext)
             else:
-                return self.getTypedRuleContext(HelloParser.StatementContext,i)
-
+                return self.getTypedRuleContext(HelloParser.StatementContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_body
@@ -1477,20 +1377,19 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitBody"):
                 listener.exitBody(self)
 
-
-
-
     def body(self):
 
         localctx = HelloParser.BodyContext(self, self._ctx, self.state)
         self.enterRule(localctx, 38, self.RULE_body)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 206
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__0) | (1 << HelloParser.T__3) | (1 << HelloParser.T__16) | (1 << HelloParser.T__18) | (1 << HelloParser.T__22) | (1 << HelloParser.Identifier))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                    (1 << HelloParser.T__0) | (1 << HelloParser.T__3) | (1 << HelloParser.T__16) | (
+                    1 << HelloParser.T__18) | (1 << HelloParser.T__22) | (1 << HelloParser.Identifier))) != 0):
                 self.state = 204
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
@@ -1527,8 +1426,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.RelationContext)
             else:
-                return self.getTypedRuleContext(HelloParser.RelationContext,i)
-
+                return self.getTypedRuleContext(HelloParser.RelationContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_expression
@@ -1541,14 +1439,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitExpression"):
                 listener.exitExpression(self)
 
-
-
-
     def expression(self):
 
         localctx = HelloParser.ExpressionContext(self, self._ctx, self.state)
         self.enterRule(localctx, 40, self.RULE_expression)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 209
@@ -1556,10 +1451,12 @@ class HelloParser ( Parser ):
             self.state = 214
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__26) | (1 << HelloParser.T__27) | (1 << HelloParser.T__28))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                    (1 << HelloParser.T__26) | (1 << HelloParser.T__27) | (1 << HelloParser.T__28))) != 0):
                 self.state = 210
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__26) | (1 << HelloParser.T__27) | (1 << HelloParser.T__28))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                        (1 << HelloParser.T__26) | (1 << HelloParser.T__27) | (1 << HelloParser.T__28))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1588,8 +1485,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.SimpleContext)
             else:
-                return self.getTypedRuleContext(HelloParser.SimpleContext,i)
-
+                return self.getTypedRuleContext(HelloParser.SimpleContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_relation
@@ -1602,14 +1498,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitRelation"):
                 listener.exitRelation(self)
 
-
-
-
     def relation(self):
 
         localctx = HelloParser.RelationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 42, self.RULE_relation)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 217
@@ -1617,10 +1510,14 @@ class HelloParser ( Parser ):
             self.state = 220
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__29) | (1 << HelloParser.T__30) | (1 << HelloParser.T__31) | (1 << HelloParser.T__32) | (1 << HelloParser.T__33) | (1 << HelloParser.T__34))) != 0):
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                    (1 << HelloParser.T__29) | (1 << HelloParser.T__30) | (1 << HelloParser.T__31) | (
+                    1 << HelloParser.T__32) | (1 << HelloParser.T__33) | (1 << HelloParser.T__34))) != 0):
                 self.state = 218
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__29) | (1 << HelloParser.T__30) | (1 << HelloParser.T__31) | (1 << HelloParser.T__32) | (1 << HelloParser.T__33) | (1 << HelloParser.T__34))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                        (1 << HelloParser.T__29) | (1 << HelloParser.T__30) | (1 << HelloParser.T__31) | (
+                        1 << HelloParser.T__32) | (1 << HelloParser.T__33) | (1 << HelloParser.T__34))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1647,8 +1544,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.FactorContext)
             else:
-                return self.getTypedRuleContext(HelloParser.FactorContext,i)
-
+                return self.getTypedRuleContext(HelloParser.FactorContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_simple
@@ -1661,14 +1557,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitSimple"):
                 listener.exitSimple(self)
 
-
-
-
     def simple(self):
 
         localctx = HelloParser.SimpleContext(self, self._ctx, self.state)
         self.enterRule(localctx, 44, self.RULE_simple)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 222
@@ -1676,10 +1569,12 @@ class HelloParser ( Parser ):
             self.state = 227
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__35) | (1 << HelloParser.T__36) | (1 << HelloParser.T__37))) != 0):
+            while (((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                    (1 << HelloParser.T__35) | (1 << HelloParser.T__36) | (1 << HelloParser.T__37))) != 0):
                 self.state = 223
                 _la = self._input.LA(1)
-                if not((((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__35) | (1 << HelloParser.T__36) | (1 << HelloParser.T__37))) != 0)):
+                if not ((((_la) & ~0x3f) == 0 and ((1 << _la) & (
+                        (1 << HelloParser.T__35) | (1 << HelloParser.T__36) | (1 << HelloParser.T__37))) != 0)):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1708,8 +1603,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.SummandContext)
             else:
-                return self.getTypedRuleContext(HelloParser.SummandContext,i)
-
+                return self.getTypedRuleContext(HelloParser.SummandContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_factor
@@ -1722,14 +1616,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitFactor"):
                 listener.exitFactor(self)
 
-
-
-
     def factor(self):
 
         localctx = HelloParser.FactorContext(self, self._ctx, self.state)
         self.enterRule(localctx, 46, self.RULE_factor)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 230
@@ -1737,10 +1628,10 @@ class HelloParser ( Parser ):
             self.state = 235
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==HelloParser.T__38 or _la==HelloParser.T__39:
+            while _la == HelloParser.T__38 or _la == HelloParser.T__39:
                 self.state = 231
                 _la = self._input.LA(1)
-                if not(_la==HelloParser.T__38 or _la==HelloParser.T__39):
+                if not (_la == HelloParser.T__38 or _la == HelloParser.T__39):
                     self._errHandler.recoverInline(self)
                 else:
                     self._errHandler.reportMatch(self)
@@ -1766,12 +1657,10 @@ class HelloParser ( Parser ):
             self.parser = parser
 
         def primary(self):
-            return self.getTypedRuleContext(HelloParser.PrimaryContext,0)
-
+            return self.getTypedRuleContext(HelloParser.PrimaryContext, 0)
 
         def expression(self):
-            return self.getTypedRuleContext(HelloParser.ExpressionContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ExpressionContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_summand
@@ -1784,9 +1673,6 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitSummand"):
                 listener.exitSummand(self)
 
-
-
-
     def summand(self):
 
         localctx = HelloParser.SummandContext(self, self._ctx, self.state)
@@ -1795,7 +1681,8 @@ class HelloParser ( Parser ):
             self.state = 243
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [HelloParser.T__38, HelloParser.T__39, HelloParser.T__40, HelloParser.T__41, HelloParser.T__42, HelloParser.Identifier, HelloParser.IntegerLiteral, HelloParser.RealLiteral]:
+            if token in [HelloParser.T__38, HelloParser.T__39, HelloParser.T__40, HelloParser.T__41, HelloParser.T__42,
+                         HelloParser.Identifier, HelloParser.IntegerLiteral, HelloParser.RealLiteral]:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 238
                 self.primary()
@@ -1833,12 +1720,10 @@ class HelloParser ( Parser ):
             return self.getToken(HelloParser.RealLiteral, 0)
 
         def modifiablePrimary(self):
-            return self.getTypedRuleContext(HelloParser.ModifiablePrimaryContext,0)
-
+            return self.getTypedRuleContext(HelloParser.ModifiablePrimaryContext, 0)
 
         def routineCall(self):
-            return self.getTypedRuleContext(HelloParser.RoutineCallContext,0)
-
+            return self.getTypedRuleContext(HelloParser.RoutineCallContext, 0)
 
         def getRuleIndex(self):
             return HelloParser.RULE_primary
@@ -1851,18 +1736,15 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitPrimary"):
                 listener.exitPrimary(self)
 
-
-
-
     def primary(self):
 
         localctx = HelloParser.PrimaryContext(self, self._ctx, self.state)
         self.enterRule(localctx, 50, self.RULE_primary)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.state = 258
             self._errHandler.sync(self)
-            la_ = self._interp.adaptivePredict(self._input,26,self._ctx)
+            la_ = self._interp.adaptivePredict(self._input, 26, self._ctx)
             if la_ == 1:
                 self.enterOuterAlt(localctx, 1)
                 self.state = 247
@@ -1871,7 +1753,7 @@ class HelloParser ( Parser ):
                 if token in [HelloParser.T__38, HelloParser.T__39]:
                     self.state = 245
                     _la = self._input.LA(1)
-                    if not(_la==HelloParser.T__38 or _la==HelloParser.T__39):
+                    if not (_la == HelloParser.T__38 or _la == HelloParser.T__39):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
@@ -1894,15 +1776,14 @@ class HelloParser ( Parser ):
                 self.state = 251
                 self._errHandler.sync(self)
                 _la = self._input.LA(1)
-                if _la==HelloParser.T__38 or _la==HelloParser.T__39:
+                if _la == HelloParser.T__38 or _la == HelloParser.T__39:
                     self.state = 250
                     _la = self._input.LA(1)
-                    if not(_la==HelloParser.T__38 or _la==HelloParser.T__39):
+                    if not (_la == HelloParser.T__38 or _la == HelloParser.T__39):
                         self._errHandler.recoverInline(self)
                     else:
                         self._errHandler.reportMatch(self)
                         self.consume()
-
 
                 self.state = 253
                 self.match(HelloParser.RealLiteral)
@@ -1957,8 +1838,7 @@ class HelloParser ( Parser ):
             if i is None:
                 return self.getTypedRuleContexts(HelloParser.ExpressionContext)
             else:
-                return self.getTypedRuleContext(HelloParser.ExpressionContext,i)
-
+                return self.getTypedRuleContext(HelloParser.ExpressionContext, i)
 
         def getRuleIndex(self):
             return HelloParser.RULE_modifiablePrimary
@@ -1971,14 +1851,11 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitModifiablePrimary"):
                 listener.exitModifiablePrimary(self)
 
-
-
-
     def modifiablePrimary(self):
 
         localctx = HelloParser.ModifiablePrimaryContext(self, self._ctx, self.state)
         self.enterRule(localctx, 52, self.RULE_modifiablePrimary)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 260
@@ -1986,7 +1863,7 @@ class HelloParser ( Parser ):
             self.state = 269
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            while _la==HelloParser.T__10 or _la==HelloParser.T__43:
+            while _la == HelloParser.T__10 or _la == HelloParser.T__43:
                 self.state = 267
                 self._errHandler.sync(self)
                 token = self._input.LA(1)
@@ -2039,19 +1916,16 @@ class HelloParser ( Parser ):
             if hasattr(listener, "exitEos"):
                 listener.exitEos(self)
 
-
-
-
     def eos(self):
 
         localctx = HelloParser.EosContext(self, self._ctx, self.state)
         self.enterRule(localctx, 54, self.RULE_eos)
-        self._la = 0 # Token type
+        self._la = 0  # Token type
         try:
             self.enterOuterAlt(localctx, 1)
             self.state = 272
             _la = self._input.LA(1)
-            if not(_la==HelloParser.EOF or _la==HelloParser.T__44):
+            if not (_la == HelloParser.EOF or _la == HelloParser.T__44):
                 self._errHandler.recoverInline(self)
             else:
                 self._errHandler.reportMatch(self)
@@ -2063,8 +1937,3 @@ class HelloParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
-
-
-
-
