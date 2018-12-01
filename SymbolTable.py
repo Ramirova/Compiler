@@ -10,6 +10,7 @@ class SymbolTable:
         self.parent_scope = parent
         self.scope = {}
         self.child_scopes = {}
+        self.routines = {}
 
     def add(self, variable_name, variable_type):
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
@@ -26,6 +27,15 @@ class SymbolTable:
     def create_child_scope(self, scope_name):
         self.child_scopes[scope_name] = SymbolTable(self)
         return self.child_scopes[scope_name]
+
+    def routine_defined_in_scope(self, routine_name):
+        if routine_name not in self.routines.keys():
+            if self.parent_scope is not None:
+                return self.parent_scope.routine_defined_in_scope(routine_name)
+            else:
+                return False
+        else:
+            return True
 
     def is_defined_in_scope(self, variable_name):
         if variable_name not in self.scope.keys():
