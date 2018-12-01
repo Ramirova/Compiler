@@ -1,9 +1,10 @@
 from HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
+import unicodedata
 
 
 class SymbolTableGenerator(HelloVisitor):
-    # symbol_table = SymbolTable()
+    symbol_table = SymbolTable(parent=None)
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -14,11 +15,13 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#variableDeclaration.
     def visitVariableDeclaration(self, ctx):
+        identifier = ctx.Identifier().getText()
+        identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         lang_type = None
         if ctx.lang_type() is not None:
-            lang_type = ctx.lang_type()
+            lang_type = self.visitLang_type(ctx)
         if lang_type is not None:
-            print("var ", ctx.Identifier(), ":", lang_type)
+            print("var ", identifier, ":", lang_type)
         # print("var ", ctx.Identifier(), " is ", ctx.expression())
         return self.visitChildren(ctx)
 
@@ -33,7 +36,9 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#primitiveType.
     def visitPrimitiveType(self, ctx):
-        return self.visitChildren(ctx)
+        c = ctx.children[0].getText()
+        c = unicodedata.normalize('NFKD', c).encode('ascii', 'ignore')
+        return c
 
     # Visit a parse tree produced by HelloParser#userType.
     def visitUserType(self, ctx):
