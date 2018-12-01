@@ -5,9 +5,7 @@ import unicodedata
 
 
 class SymbolTableGenerator(HelloVisitor):
-
     current_symbol_table = SymbolTable(parent=None)
-
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -67,6 +65,10 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
+        routine_name = ctx.Identifier().getText()
+        routine_name = unicodedata.normalize('NFKD', routine_name).encode('ascii', 'ignore')
+        if not self.current_symbol_table.routine_defined_in_scope(routine_name):
+            raise Exception('Routine {} is not defined'.format(routine_name))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#whileLoop.
@@ -75,6 +77,10 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
+        identifier = ctx.Identifier().getText()
+        identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+        if not self.current_symbol_table.is_defined_in_scope(identifier):
+            raise Exception('Variable {} is not defined'.format(identifier))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#lang_range.
@@ -88,6 +94,7 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        self.current_symbol_table.add_routine(identifier)
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
         peremennaya = self.visitChildren(ctx)
         self.current_symbol_table = self.current_symbol_table.parent_scope
@@ -146,7 +153,7 @@ class SymbolTableGenerator(HelloVisitor):
             is_real_lit = True
         elif unicodedata.normalize('NFKD', children[0].getText()).encode('ascii',
                                                                          'ignore') == 'true' or unicodedata.normalize(
-                'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':
+            'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':
             is_boolean_lit = True
 
         return self.visitChildren(ctx)
@@ -162,6 +169,8 @@ class SymbolTableGenerator(HelloVisitor):
         if len(children) == 1:
             identifier = children[0].getText()
             identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+            if not self.current_symbol_table.is_defined_in_scope(identifier):
+                raise Exception('Variable {} is not defined'.format(identifier))
             # return identifier
         elif type(children[2]) is HelloParser.ExpressionContext:
             array_identifier = children[0].getText()

@@ -1,4 +1,12 @@
 var kek: integer;
+
+routine lol is
+    lol(5)
+    if kek > 2 then
+        a := a + kek
+    end
+end;
+
 routine cheburek is
     var kiska: integer
 end;

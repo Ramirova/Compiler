@@ -54,7 +54,8 @@ statement
     ;
 
 assignment
-    : modifiablePrimary ':=' expression;
+    : modifiablePrimary ':=' expression
+    ;
 
 routineCall
     : Identifier ('(' expression ( ',' expression )* ')' )?
