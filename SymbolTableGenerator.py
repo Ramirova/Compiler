@@ -89,7 +89,9 @@ class SymbolTableGenerator(HelloVisitor):
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
-        return self.visitChildren(ctx)
+        peremennaya = self.visitChildren(ctx)
+        self.current_symbol_table = self.current_symbol_table.parent_scope
+        return peremennaya
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
