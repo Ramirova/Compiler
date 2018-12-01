@@ -1,17 +1,32 @@
 class TypeTable:
+    """
+    The table which contains all types defined in the global scope.
+    There are three possible kinds of types: Primitives, Arrays, Records.
 
-    table = None
+    The table itself is a dictionary, where keys are ids of types (can be gotten in the classes of types)
+    The first three keys - 1, 2, 3 are reserved for the primitives types: integer, real and boolean respectively.
 
-    def __init__(self, ):
-        self.types = {}
-        if TypeTable.table is None:
-            TypeTable.table = self
+    The whole description of the types can be found in the corresponding classes.
 
-    def add_type(self, type_id, type_content):
-        self.types[type_id] = type_content
+    The table itself is singleton and should bbe accessed
+    """
+
+    def __init__(self):
+        pass
+
+    table = {}
+
+    @staticmethod
+    def add_type(type_id, type_content):
+        TypeTable.table[type_id] = type_content
 
 
 class PrimitiveType:
+    """
+    This class represents primitive type. It is only needed as enumerator. To reference a primitive type, simply
+    use its id as defined in this class
+    """
+
     integer = 1
     real = 2
     boolean = 3
@@ -21,6 +36,10 @@ class PrimitiveType:
 
 
 class ArrayType:
+    """
+        This class represents primitive type. It is only needed as enumerator. To reference a primitive type, simply
+        use its id as defined in this class
+    """
 
     def __init__(self, nested_type):
 
@@ -30,8 +49,10 @@ class ArrayType:
             self.nested_type_id = nested_type
 
         if type(nested_type) is ArrayType:
-            self.nested_type_id = nested_type.get_hash()
-            pass
+            self.nested_type_id = nested_type.get_id()
+
+        if type(nested_type) is RecordType:
+            self.nested_type_id = nested_type.get_id()
 
         TypeTable.table.types[self.get_id()] = self
 
@@ -41,23 +62,9 @@ class ArrayType:
 
 class RecordType:
 
-    def __init__(self, nested_type):
-        if type(nested_type) is PrimitiveType:
-            self.nested_type_id = nested_type
+    def __init__(self, variable_dict):
+        self.inner_declarations = variable_dict
+        TypeTable.table.types[self.get_id()] = self
 
-        if type(nested_type) is ArrayType:
-            self.nested_type_id = nested_type.get_hash()
-            pass
-
-        TypeTable.table.types[self.get_hash()] = self
-
-    def get_hash(self):
-        return hash(self.nested_type_id)
-
-
-
-
-c = {'a': 12345, 'b': 3466443}
-d = {'a': 12345, 'b': 3466443}
-
-print(hash(frozenset(c.items())), hash(frozenset(d.items())))
+    def get_id(self):
+        return hash(frozenset(self.inner_declarations.items()))

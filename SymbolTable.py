@@ -29,7 +29,10 @@ class SymbolTable:
 
     def is_defined_in_scope(self, variable_name):
         if self.scope[variable_name] is None:
-            return False
+            if self.parent_scope is not None:
+                return self.parent_scope.is_defined_in_scope(variable_name)
+            else:
+                return False
         else:
             return True
 
