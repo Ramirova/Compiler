@@ -24,7 +24,7 @@ class SymbolTable:
             self.scope[variable_name].used = True
 
     def create_child_scope(self, scope_name):
-        self.child_scopes[scope_name] = []
+        self.child_scopes[scope_name] = SymbolTable(self)
         return self.child_scopes[scope_name]
 
     def is_defined_in_scope(self, variable_name):
