@@ -3,8 +3,8 @@ class SymbolTable:
     root_table = None
 
     def __init__(self, parent):
-        if not (SymbolTable.root_table is None and parent is None):
-            raise Exception
+        # if not (SymbolTable.root_table is not None and parent is None):
+        #     raise Exception
         if parent is None and SymbolTable.root_table is None:
             SymbolTable.root_table = self
         self.parent_scope = parent

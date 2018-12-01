@@ -1,4 +1,6 @@
 var kek: integer;
-routine cheburek
-routine piska
-routine mur
+routine cheburek is
+    var kiska: integer
+end;
+routine piska;
+routine mur;
