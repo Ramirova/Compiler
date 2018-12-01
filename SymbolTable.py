@@ -15,7 +15,7 @@ class SymbolTable:
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
     def remove(self, variable_name):
-        self.scope[variable_name] = None
+        del self.scope[variable_name]
 
     def set_used(self, variable_name):
         if not self.is_defined_in_scope(variable_name):
@@ -28,7 +28,7 @@ class SymbolTable:
         return self.child_scopes[scope_name]
 
     def is_defined_in_scope(self, variable_name):
-        if self.scope[variable_name] is None:
+        if variable_name not in self.scope.keys():
             if self.parent_scope is not None:
                 return self.parent_scope.is_defined_in_scope(variable_name)
             else:
