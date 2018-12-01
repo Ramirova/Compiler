@@ -1,4 +1,1 @@
-routine kek is
-    a := 3
-    var a: integer
-end;
+var a: integer;
