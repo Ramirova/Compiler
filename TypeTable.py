@@ -37,11 +37,14 @@ class PrimitiveType:
 
 class ArrayType:
     """
-        This class represents primitive type. It is only needed as enumerator. To reference a primitive type, simply
-        use its id as defined in this class
+    This class represents array type. It contains self.nested_type_id which is the type of elements in array.
+    The new type is automatically added to the Type table whenever a new type object is created
     """
 
     def __init__(self, nested_type):
+        """
+        :param nested_type: id of the type of the elements in the array
+        """
 
         self.nested_type_id = 0
 
@@ -54,17 +57,25 @@ class ArrayType:
         if type(nested_type) is RecordType:
             self.nested_type_id = nested_type.get_id()
 
-        TypeTable.table.types[self.get_id()] = self
+        TypeTable.table[self.get_id()] = self
 
     def get_id(self):
         return hash(self.nested_type_id)
 
 
 class RecordType:
+    """
+    This class represents array type. It contains self.nested_type_id which is the type of elements in array.
+    The new type is automatically added to the Type table whenever a new type object is created.
+    """
 
     def __init__(self, variable_dict):
+        """
+        :param variable_dict: a dictionary where the keys are the names of the variables in the record and the values
+        are ids of their types.
+        """
         self.inner_declarations = variable_dict
-        TypeTable.table.types[self.get_id()] = self
+        TypeTable.table[self.get_id()] = self
 
     def get_id(self):
         return hash(frozenset(self.inner_declarations.items()))
