@@ -1,10 +1,13 @@
 from HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
+from HelloParser import HelloParser
 import unicodedata
 
 
 class SymbolTableGenerator(HelloVisitor):
-    symbol_table = SymbolTable(parent=None)
+
+    current_symbol_table = SymbolTable(parent=None)
+
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -17,11 +20,13 @@ class SymbolTableGenerator(HelloVisitor):
     def visitVariableDeclaration(self, ctx):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        lang_type = None
-        if ctx.lang_type() is not None:
-            lang_type = self.visitLang_type(ctx)
-        if lang_type is not None:
-            print("var ", identifier, ":", lang_type)
+        lang_type = self.visitLang_type(ctx)
+        expression = None
+        self.current_symbol_table.add(identifier, lang_type)
+        # if ctx.lang_type() is not None:
+        #     lang_type = self.visitLang_type(ctx)
+        # if lang_type is not None:
+        #     print("var ", identifier, ":", lang_type)
         # print("var ", ctx.Identifier(), " is ", ctx.expression())
         return self.visitChildren(ctx)
 
@@ -82,6 +87,8 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
+        identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#parameters.
@@ -90,6 +97,7 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#parameterDeclaration.
     def visitParameterDeclaration(self, ctx):
+
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#body.
@@ -98,10 +106,12 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
+        type = 'boolean'
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#relation.
     def visitRelation(self, ctx):
+        type = 'boolean'
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#simple.
@@ -110,6 +120,7 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#factor.
     def visitFactor(self, ctx):
+        children = ctx.children
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#summand.
@@ -118,10 +129,47 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#primary.
     def visitPrimary(self, ctx):
+        children = ctx.children
+
+        int_lit = ctx.IntegerLiteral()
+        float_lit = ctx.RealLiteral()
+
+        is_int_lit = False
+        is_real_lit = False
+        is_boolean_lit = False
+
+        if int_lit is not None:
+            is_int_lit = True
+        elif float_lit is not None:
+            is_real_lit = True
+        elif unicodedata.normalize('NFKD', children[0].getText()).encode('ascii',
+                                                                         'ignore') == 'true' or unicodedata.normalize(
+                'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':
+            is_boolean_lit = True
+
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#modifiablePrimary.
     def visitModifiablePrimary(self, ctx):
+        children = ctx.children
+
+        identifier = None
+        array_identifier = None
+        function_calls = []
+
+        if len(children) == 1:
+            identifier = children[0].getText()
+            identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+            # return identifier
+        elif type(children[2]) is HelloParser.ExpressionContext:
+            array_identifier = children[0].getText()
+            array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
+        else:
+            for i in range(len(children)):
+                if i % 2 == 0:
+                    id = children[i].getText()
+                    id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+                    function_calls.append(id)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#eos.

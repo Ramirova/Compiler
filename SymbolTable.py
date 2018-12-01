@@ -11,8 +11,8 @@ class SymbolTable:
         self.scope = {}
         self.child_scopes = {}
 
-    def add(self, variable_name, variable_type, value, initializer):
-        self.scope[variable_name] = SymbolTableEntry(False, initializer, variable_type, variable_name, value)
+    def add(self, variable_name, variable_type):
+        self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
     def remove(self, variable_name):
         self.scope[variable_name] = None
@@ -35,10 +35,10 @@ class SymbolTable:
 
 
 class SymbolTableEntry:
-    def __init__(self, used, initializer, variable_type, variable_name, value):
+    def __init__(self, used, variable_type, variable_name):
         self.used = used
-        self.initializer = initializer
+        # self.initializer = initializer
         self.variable_type = variable_type
         self.variable_name = variable_name
-        self.value = value
+        # self.value = value
 
