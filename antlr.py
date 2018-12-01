@@ -17,9 +17,11 @@ def main():
     parser = HelloParser(stream)
     tree = parser.program()
     # printer = HelloPrintListener()
-    printer = SymbolTableGenerator()
-    walker = ParseTreeWalker()
-    walker.walk(printer, tree)
+    # printer = SymbolTableGenerator()
+    visitor = SymbolTableGenerator()
+    visitor.visit(tree)
+    # walker = ParseTreeWalker()
+    # walker.walk(printer, tree)
 
 
 if __name__ == '__main__':

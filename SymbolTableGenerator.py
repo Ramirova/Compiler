@@ -18,8 +18,8 @@ class SymbolTableGenerator(HelloVisitor):
         if ctx.lang_type() is not None:
             lang_type = ctx.lang_type()
         if lang_type is not None:
-            print("var ", ctx.Identifier(1), ":", lang_type)
-        print("var ", ctx.Identifier(2), " is ", ctx.expression(1))
+            print("var ", ctx.Identifier(), ":", lang_type)
+        # print("var ", ctx.Identifier(), " is ", ctx.expression())
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
