@@ -31,6 +31,8 @@ class PrimitiveType:
     real = 2
     boolean = 3
 
+    types = {'integer': 1, 'real': 2, 'boolean': 3}
+
     def __init__(self):
         pass
 
