@@ -1,1 +1,1 @@
-type kinet is boolean;
+var my_array : array[3] integer;
