@@ -62,7 +62,7 @@ class ArrayType:
         TypeTable.table[self.get_id()] = self
 
     def get_id(self):
-        return hash(self.nested_type_id)
+        return hash(frozenset({0: self.nested_type_id}.items()))
 
 
 class RecordType:
