@@ -61,7 +61,7 @@ class CCodeGen(HelloVisitor):
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
 
     def getArraySize(self, ctx):
-        return ctx.getText().split('[')[1].split(']')[0]
+        return self.expressionToString(ctx.getText().split('[')[1].split(']')[0])
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
@@ -177,6 +177,9 @@ class CCodeGen(HelloVisitor):
     # Visit a parse tree produced by HelloParser#body.
     def visitBody(self, ctx):
         return self.visitChildren(ctx)
+
+    def expressionToString(self, expression):
+        return expression.replace("and", " && ").replace("xor", " ^ ").replace("/=", " != ").replace("or", " || ")
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
