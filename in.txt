@@ -1,6 +1,3 @@
-var kek: integer is 5;
+var kek: record var a: record var mur: integer end var b: array [2] boolean end;
 
-routine lol(a: integer, b: integer) is
-    var c: integer
-    a := c + b
-end;
+var kinets: boolen;

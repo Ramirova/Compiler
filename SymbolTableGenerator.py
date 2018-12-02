@@ -9,6 +9,8 @@ class SymbolTableGenerator(HelloVisitor):
     current_symbol_table = SymbolTable(parent=None)
     type_table = TypeTable
 
+    # todo check second time declaration
+
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -38,7 +40,8 @@ class SymbolTableGenerator(HelloVisitor):
     def visitPrimitiveType(self, ctx):
         c = ctx.children[0].getText()
         c = unicodedata.normalize('NFKD', c).encode('ascii', 'ignore')
-        return c
+        id = PrimitiveType.types[c]
+        return id
 
     # Visit a parse tree produced by HelloParser#userType.
     def visitUserType(self, ctx):
@@ -46,11 +49,25 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#recordType.
     def visitRecordType(self, ctx):
-        return self.visitChildren(ctx)
+        self.current_symbol_table = self.current_symbol_table.create_child_scope('current_record')
+        children = ctx.children
+        record_variables = {}
+        for c in children:
+            if type(c) == HelloParser.VariableDeclarationContext:
+                var_name = unicodedata.normalize('NFKD', c.children[1].getText()).encode('ascii', 'ignore')
+                var_type = self.visitLang_type(c)
+                record_variables[var_name] = var_type
+        recur = self.visitChildren(ctx)
+        new_type = RecordType(record_variables)
+        self.current_symbol_table = self.current_symbol_table.parent_scope
+        self.current_symbol_table.remove_child_scope('current_record')
+        return new_type.get_id()
 
     # Visit a parse tree produced by HelloParser#arrayType.
     def visitArrayType(self, ctx):
-        return self.visitChildren(ctx)
+        nested_type = self.visitChildren(ctx)
+        new_type = ArrayType(nested_type)
+        return new_type.get_id()
 
     # Visit a parse tree produced by HelloParser#statement.
     def visitStatement(self, ctx):

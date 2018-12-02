@@ -48,16 +48,16 @@ class ArrayType:
         :param nested_type: id of the type of the elements in the array
         """
 
-        self.nested_type_id = 0
+        self.nested_type_id = nested_type
 
-        if type(nested_type) is PrimitiveType:
-            self.nested_type_id = nested_type
-
-        if type(nested_type) is ArrayType:
-            self.nested_type_id = nested_type.get_id()
-
-        if type(nested_type) is RecordType:
-            self.nested_type_id = nested_type.get_id()
+        # if type(nested_type) is PrimitiveType:
+        #     self.nested_type_id = nested_type
+        #
+        # if type(nested_type) is ArrayType:
+        #     self.nested_type_id = nested_type.get_id()
+        #
+        # if type(nested_type) is RecordType:
+        #     self.nested_type_id = nested_type.get_id()
 
         TypeTable.table[self.get_id()] = self
 
