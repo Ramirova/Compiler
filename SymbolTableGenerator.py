@@ -24,12 +24,13 @@ class SymbolTableGenerator(HelloVisitor):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         lang_type = self.visitLang_type(ctx)
+        if self.current_symbol_table.is_defined_in_scope(identifier):
+            raise Exception('Variable {} is already defined'.format(identifier))
         self.current_symbol_table.add(identifier, lang_type)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
-        print("type ", ctx.Identifier(), ' is ', ctx.lang_type())
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#lang_type.
@@ -108,6 +109,8 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        if self.current_symbol_table.routine_defined_in_scope(identifier):
+            raise Exception('Routine {} is already defined'.format(identifier))
         self.current_symbol_table.add_routine(identifier)
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
         peremennaya = self.visitChildren(ctx)
@@ -123,6 +126,8 @@ class SymbolTableGenerator(HelloVisitor):
         id = ctx.children[0].getText()
         id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
         lang_type = self.visitLang_type(ctx)
+        if self.current_symbol_table.is_defined_in_current_scope(id):
+            raise Exception('Parameter with name {} is already defined'.format(id))
         self.current_symbol_table.add(id, lang_type)
         return self.visitChildren(ctx)
 
