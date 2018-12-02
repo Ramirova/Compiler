@@ -7,6 +7,7 @@ import unicodedata
 
 class SymbolTableGenerator(HelloVisitor):
     current_symbol_table = SymbolTable(parent=None)
+    type_table = TypeTable
 
 
     def visitProgram(self, ctx):
@@ -102,7 +103,10 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#parameterDeclaration.
     def visitParameterDeclaration(self, ctx):
-
+        id = ctx.children[0].getText()
+        id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+        lang_type = self.visitLang_type(ctx)
+        self.current_symbol_table.add(id, lang_type)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#body.
@@ -167,15 +171,20 @@ class SymbolTableGenerator(HelloVisitor):
             identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(identifier):
                 raise Exception('Variable {} is not defined'.format(identifier))
-            # return identifier
         elif type(children[2]) is HelloParser.ExpressionContext:
             array_identifier = children[0].getText()
             array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
+            if not self.current_symbol_table.is_defined_in_scope(array_identifier):
+                raise Exception('Array with name {} is not defined'.format(array_identifier))
         else:
             for i in range(len(children)):
                 if i % 2 == 0:
                     id = children[i].getText()
                     id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+                    # TODO check validity of record fields
+                    # check that the first identifier is a declared variable with type record
+                    if i == 0 and not self.current_symbol_table.is_defined_in_scope(id):
+                        raise Exception('Record with name {} is not defined'.format(id))
                     function_calls.append(id)
         return self.visitChildren(ctx)
 

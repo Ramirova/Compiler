@@ -1,10 +1,8 @@
 var kek: integer;
 
-routine lol is
-    lol(5)
-    if kek > 2 then
-        a := a + kek
-    end
+routine lol(a: integer, b: integer) is
+    var c: integer
+    a := c + b
 end;
 
 routine cheburek is
