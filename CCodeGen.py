@@ -45,7 +45,6 @@ class CCodeGen(HelloVisitor):
                 identifier_type = self.getVariableType(identifier, type_id, ctx) + ""
         else:
             identifier_type = ctx.children[3].getText()
-
         declaration = identifier_type + " " + identifier
         self.queue.append((declaration + ";").encode('ascii', 'ignore'))
         print(self.queue)
@@ -68,28 +67,24 @@ class CCodeGen(HelloVisitor):
         type = self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]]
         identifier = ctx.children[1].getText().encode('ascii', 'ignore')
         array_size = 0
-
         if isinstance(type, ArrayType):
             array_size = self.getArraySize(ctx)
-        alias_type = ""
+        result = ""
         alias_name = ctx.children[3].children[0].children[0].children[4].getText().encode('ascii', 'ignore')
+
         if array_size != 0:
             array_size = "[" + str(array_size) + "]"
-            if alias_name in AliasType.table:
-                alias_type = alias_name
-            else:
-                alias_type = self.getVariableType(identifier,
+            if alias_name not in AliasType.table:
+                alias_name = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-            result = "typedef " + alias_type + " " + ctx.children[1].getText() + array_size
+            result = array_size
         else:
-            if alias_name in AliasType.table:
-                alias_type = alias_name
-            else:
-                alias_type = self.getVariableType(identifier,
+            if alias_name not in AliasType.table:
+                alias_name = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-            result = "typedef " + alias_type + " " + ctx.children[1].getText()
+        result = "typedef " + alias_name + " " + result
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
         print(self.type_def_queue)
