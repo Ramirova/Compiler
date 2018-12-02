@@ -81,3 +81,14 @@ class RecordType:
 
     def get_id(self):
         return hash(frozenset(self.inner_declarations.items()))
+
+
+class AliasType:
+    """
+    This class represents mapping between identifier (alias) name and its type id
+    """
+
+    table = {}
+
+    def __init__(self):
+        pass
