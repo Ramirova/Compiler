@@ -94,7 +94,7 @@ class AliasType:
         pass
 
 
-class TypeComparator:
+class TypeUtils:
 
     def __init__(self):
         pass
@@ -108,5 +108,9 @@ class TypeComparator:
             return True
 
         return False
+
+    @staticmethod
+    def is_primitive(type_id):
+        return type_id in [1, 2, 3]
 
 
