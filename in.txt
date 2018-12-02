@@ -1,3 +1,4 @@
-var kek: record var a: record var mur: integer end var b: array [2] boolean end;
-
-var kinets: boolen;
+routine lol(a: integer, b: integer) is
+    var c: integer
+    a := c + b
+end;
