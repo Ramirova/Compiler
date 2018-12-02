@@ -3,7 +3,6 @@ from HelloLexer import HelloLexer
 from HelloListener import HelloListener
 from HelloParser import HelloParser
 from SymbolTableGenerator import SymbolTableGenerator
-import sys
 
 
 class HelloPrintListener(HelloListener):

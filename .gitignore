@@ -2,3 +2,11 @@
 \.idea/
 
 gen/
+
+venv/bin/
+
+venv/lib/python2\.7/
+
+venv/
+
+*.pyc
