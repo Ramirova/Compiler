@@ -211,6 +211,14 @@ class SymbolTableGenerator(HelloVisitor):
                     if i == 0 and not self.current_symbol_table.is_defined_in_scope(id):
                         raise Exception('Record with name {} is not defined'.format(id))
                     function_calls.append(id)
+
+            type_id = self.current_symbol_table.get_variable_info(function_calls[0]).variable_type
+            current_type = self.type_table.table[type_id]
+            for i in range(1, len(function_calls)-1):
+                if function_calls[i+1] not in current_type.inner_declarations.keys():
+                    raise Exception("Record {} doesn't have a field [{}".format(function_calls[i], function_calls[i+1]))
+                type_id = current_type.inner_declarations[function_calls[i+1]]
+                current_type = self.type_table.table[type_id]
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#eos.
