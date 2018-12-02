@@ -130,5 +130,6 @@ class TypeUtils:
             return PrimitiveType.real
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.integer
+        raise Exception("Incompatible types {} and {}".format(type_id_1, type_id_2))
 
 

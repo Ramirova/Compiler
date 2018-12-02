@@ -12,9 +12,6 @@ class SymbolTableGenerator(HelloVisitor):
     type_table.table[2] = PrimitiveType()
     type_table.table[3] = PrimitiveType()
 
-    # todo check second time declaration
-
-
     def visitProgram(self, ctx):
         a = self.visitChildren(ctx)
         return a
@@ -53,13 +50,13 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#lang_type.
     def visitLang_type(self, ctx):
         children = ctx.children
-        if len(children) > 3 and  hasattr(ctx.children[3], 'Identifier') and ctx.children[3].Identifier() is not None:
+        if len(children) > 3 and hasattr(ctx.children[3], 'Identifier') and ctx.children[3].Identifier() is not None:
             id = ctx.children[3].Identifier().getText()
             id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
             return AliasType.table[id]
         return self.visitChildren(ctx)
 
- # Visit a parse tree produced by HelloParser#primitiveType.
+    # Visit a parse tree produced by HelloParser#primitiveType.
     def visitPrimitiveType(self, ctx):
         c = ctx.children[0].getText()
         c = unicodedata.normalize('NFKD', c).encode('ascii', 'ignore')
@@ -106,7 +103,9 @@ class SymbolTableGenerator(HelloVisitor):
         routine_name = unicodedata.normalize('NFKD', routine_name).encode('ascii', 'ignore')
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
             raise Exception('Routine {} is not defined'.format(routine_name))
-        return self.visitChildren(ctx)
+        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+        self.visitChildren(ctx)
+        return return_type
 
     # Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
@@ -131,16 +130,22 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
-        parameters_context = ctx.parameters().children
-        declarations = []
-        for i in range(len(parameters_context)):
-            if i % 2 == 1:
-                declarations.append(parameters_context[i])
-        parameters = {}
-        for d in declarations:
-            id, t = self.visitParameterDeclaration(d)
-            parameters[id] = t
-        return_type = self.visitLang_type(ctx.lang_type())
+        if ctx.parameters() is not None:
+            parameters_context = ctx.parameters().children
+            declarations = []
+            for i in range(len(parameters_context)):
+                if i % 2 == 1:
+                    declarations.append(parameters_context[i])
+            parameters = {}
+            for d in declarations:
+                id, t = self.visitParameterDeclaration(d)
+                parameters[id] = t
+        else:
+            parameters = None
+        if ctx.lang_type() is not None:
+            return_type = self.visitLang_type(ctx.lang_type())
+        else:
+            return_type = None
         if self.current_symbol_table.routine_defined_in_scope(identifier):
             raise Exception('Routine {} is already defined'.format(identifier))
         self.current_symbol_table.add_routine(identifier, parameters, return_type)
@@ -185,35 +190,38 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#factor.
     def visitFactor(self, ctx):
         children = ctx.children
-        return self.visitChildren(ctx)
+        factor_type = self.visitSummand(children[0])
+        if len(children) > 1:
+            factor_type = TypeUtils.deduce_type(self.visitSummand(children[0]), self.visitSummand(children[2]))
+        return factor_type
 
     # Visit a parse tree produced by HelloParser#summand.
     def visitSummand(self, ctx):
-        return self.visitChildren(ctx)
+        c = self.visitChildren(ctx)
+        return c
 
     # Visit a parse tree produced by HelloParser#primary.
     def visitPrimary(self, ctx):
-        primitives = [1.0, 2.0, 3.0]
+        primitives = [1, 2, 3]
         child_type = self.visitChildren(ctx)
         children = ctx.children
         type_id = None
 
         int_lit = ctx.IntegerLiteral()
         real_lit = ctx.RealLiteral()
+        routine_call = ctx.routineCall()
 
-        is_int_lit = False
-        is_real_lit = False
-        is_boolean_lit = False
-
-        if int_lit is not None:
+        if routine_call is not None:  # if primary is routine call
+            type_id = self.visitRoutineCall(routine_call)
+        elif int_lit is not None:  # if primary is integer
             type_id = PrimitiveType.integer
-        elif real_lit is not None:
+        elif real_lit is not None:  # if primary is real
             type_id = PrimitiveType.real
         elif unicodedata.normalize('NFKD', children[0].getText()).encode('ascii',
                                                                          'ignore') == 'true' or unicodedata.normalize(
-            'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':
+            'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':  # if primary is boolean
             type_id = PrimitiveType.boolean
-        elif child_type not in primitives:
+        else:  # if primary is modifiable primary
             type_id = child_type
         return type_id
 
@@ -251,13 +259,13 @@ class SymbolTableGenerator(HelloVisitor):
 
             type_id = self.current_symbol_table.get_variable_info(function_calls[0]).variable_type
             current_type = self.type_table.table[type_id]
-            for i in range(len(function_calls)-1):
-                if function_calls[i+1] not in current_type.inner_declarations.keys():
-                    raise Exception("Record {} doesn't have a field {}".format(function_calls[i], function_calls[i+1]))
-                type_id = current_type.inner_declarations[function_calls[i+1]]
+            for i in range(len(function_calls) - 1):
+                if function_calls[i + 1] not in current_type.inner_declarations.keys():
+                    raise Exception(
+                        "Record {} doesn't have a field {}".format(function_calls[i], function_calls[i + 1]))
+                type_id = current_type.inner_declarations[function_calls[i + 1]]
                 current_type = self.type_table.table[type_id]
             return type_id
-
 
     # Visit a parse tree produced by HelloParser#eos.
     def visitEos(self, ctx):
