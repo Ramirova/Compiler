@@ -113,4 +113,22 @@ class TypeUtils:
     def is_primitive(type_id):
         return type_id in [1, 2, 3]
 
+    @staticmethod
+    def deduce_type(type_id_1, type_id_2):
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.integer
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.real\
+                or type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.boolean\
+                or type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.integer
+        if type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.real:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.boolean\
+                or type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.real:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
+            return PrimitiveType.integer
+
 
