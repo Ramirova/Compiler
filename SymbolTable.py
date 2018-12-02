@@ -12,6 +12,14 @@ class SymbolTable:
         self.child_scopes = {}
         self.routines = {}
 
+    def get_variable_info(self, variable_name):
+        if self.parent_scope is None and not self.is_defined_in_scope(variable_name):
+            raise Exception('there is no {} variable defined'.format(variable_name))
+        if self.is_defined_in_scope(variable_name):
+            return self.scope[variable_name]
+        else:
+            return self.parent_scope.get_variable_info(variable_name)
+
     def add(self, variable_name, variable_type):
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
