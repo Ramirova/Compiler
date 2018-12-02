@@ -16,7 +16,8 @@ class SymbolTableGenerator(HelloVisitor):
 
 
     def visitProgram(self, ctx):
-        return self.visitChildren(ctx)
+        a = self.visitChildren(ctx)
+        return a
 
     # Visit a parse tree produced by HelloParser#simpleDeclaration.
     def visitSimpleDeclaration(self, ctx):
@@ -29,6 +30,13 @@ class SymbolTableGenerator(HelloVisitor):
         lang_type = self.visitLang_type(ctx)
         if self.current_symbol_table.is_defined_in_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
+        if lang_type is None:
+            expression = ctx.expression()
+            expr_children = expression.children
+            if len(expr_children) > 1:
+                lang_type = PrimitiveType.types['boolean']
+            elif expr_children[0].children > 1:
+                lang_type = PrimitiveType.types['boolean']
         self.current_symbol_table.add(identifier, lang_type)
         return self.visitChildren(ctx)
 
@@ -123,9 +131,19 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        parameters_context = ctx.parameters().children
+        declarations = []
+        for i in range(len(parameters_context)):
+            if i % 2 == 1:
+                declarations.append(parameters_context[i])
+        parameters = {}
+        for d in declarations:
+            id, t = self.visitParameterDeclaration(d)
+            parameters[id] = t
+        return_type = self.visitLang_type(ctx.lang_type())
         if self.current_symbol_table.routine_defined_in_scope(identifier):
             raise Exception('Routine {} is already defined'.format(identifier))
-        self.current_symbol_table.add_routine(identifier)
+        self.current_symbol_table.add_routine(identifier, parameters, return_type)
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
         peremennaya = self.visitChildren(ctx)
         self.current_symbol_table = self.current_symbol_table.parent_scope
@@ -143,7 +161,8 @@ class SymbolTableGenerator(HelloVisitor):
         if self.current_symbol_table.is_defined_in_current_scope(id):
             raise Exception('Parameter with name {} is already defined'.format(id))
         self.current_symbol_table.add(id, lang_type)
-        return self.visitChildren(ctx)
+        self.visitChildren(ctx)
+        return id, lang_type
 
     # Visit a parse tree produced by HelloParser#body.
     def visitBody(self, ctx):
@@ -174,28 +193,33 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#primary.
     def visitPrimary(self, ctx):
+        primitives = [1.0, 2.0, 3.0]
+        child_type = self.visitChildren(ctx)
         children = ctx.children
+        type_id = None
 
         int_lit = ctx.IntegerLiteral()
-        float_lit = ctx.RealLiteral()
+        real_lit = ctx.RealLiteral()
 
         is_int_lit = False
         is_real_lit = False
         is_boolean_lit = False
 
         if int_lit is not None:
-            is_int_lit = True
-        elif float_lit is not None:
-            is_real_lit = True
+            type_id = PrimitiveType.integer
+        elif real_lit is not None:
+            type_id = PrimitiveType.real
         elif unicodedata.normalize('NFKD', children[0].getText()).encode('ascii',
                                                                          'ignore') == 'true' or unicodedata.normalize(
             'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':
-            is_boolean_lit = True
-
-        return self.visitChildren(ctx)
+            type_id = PrimitiveType.boolean
+        elif child_type not in primitives:
+            type_id = child_type
+        return type_id
 
     # Visit a parse tree produced by HelloParser#modifiablePrimary.
     def visitModifiablePrimary(self, ctx):
+        self.visitChildren(ctx)
         children = ctx.children
 
         identifier = None
@@ -207,11 +231,13 @@ class SymbolTableGenerator(HelloVisitor):
             identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(identifier):
                 raise Exception('Variable {} is not defined'.format(identifier))
+            return self.current_symbol_table.get_variable_info(identifier).variable_type
         elif type(children[2]) is HelloParser.ExpressionContext:
             array_identifier = children[0].getText()
             array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
+            return self.current_symbol_table.get_variable_info(array_identifier).variable_type
         else:
             for i in range(len(children)):
                 if i % 2 == 0:
@@ -230,7 +256,8 @@ class SymbolTableGenerator(HelloVisitor):
                     raise Exception("Record {} doesn't have a field {}".format(function_calls[i], function_calls[i+1]))
                 type_id = current_type.inner_declarations[function_calls[i+1]]
                 current_type = self.type_table.table[type_id]
-        return self.visitChildren(ctx)
+            return type_id
+
 
     # Visit a parse tree produced by HelloParser#eos.
     def visitEos(self, ctx):
