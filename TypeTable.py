@@ -92,3 +92,21 @@ class AliasType:
 
     def __init__(self):
         pass
+
+
+class TypeComparator:
+
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def are_compatible(type_id_1, type_id_2):
+        if type_id_1 == type_id_2:
+            return True
+
+        if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
+            return True
+
+        return False
+
+
