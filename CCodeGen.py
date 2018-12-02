@@ -6,7 +6,11 @@ import unicodedata
 
 class CCodeGen(HelloVisitor):
 
-
+    c_type_map = {
+            "integer" : "int",
+            "real": "double",
+            "boolean": "bool",
+        }
 
     def __init__(self, args):
         # self.code_file = open("c_code.c", "w+")
@@ -96,9 +100,30 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
-        self.current_scope = self.current_scope.child_scopes[ctx.children[1]]
+        # self.current_scope = self.current_scope.child_scopes[ctx.children[1]]
+        routine_declaration = ""
+        routine_declaration = "void " + ctx.children[1].getText() + " "
+        routine_args = ctx.children[2].split(",")
+        args = ""
+        for arg in routine_args:
+            name = arg.split(":")[0]
+            type = arg.split(":")[1]
+            type_id = self.current_scope.scope[name].variable_type
+            arg_type = self.type_table[type_id]
+            args += self.c_type_map[arg_type] + " " + name + ", "
+        if args is not "":
+            args = args[:-2]
+        routine_declaration += "(" + args + ") {\n"
+        self.queue.append(routine_declaration)
+        print(routine_declaration)
+        # print(ctx.children[0])
+        # print(ctx.children[1])
+        # print(ctx.children[2].getText())
+        # print(ctx.children[3])
+        # print(ctx.children[4])
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent
+        self.queue.append("}\n")
         return visit_children
 
     # Visit a parse tree produced by HelloParser#parameters.
