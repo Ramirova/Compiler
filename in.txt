@@ -1,1 +1,3 @@
-var my_array : array[3] integer;
+type a is array[3] integer;
+type b is array[4] a;
+var my_array : b;

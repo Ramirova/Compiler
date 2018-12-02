@@ -13,9 +13,9 @@ class CCodeGen(HelloVisitor):
         }
 
     primitive_type_map = {
-        0: "integer",
-        1: "double",
-        2: "boolean"
+        1: "int",
+        0: "double",
+        2: "bool"
     }
 
     def __init__(self, args):
@@ -25,6 +25,8 @@ class CCodeGen(HelloVisitor):
         # self.code_file.write("{\n")\
         self.current_scope = SymbolTable.root_table
         self.type_table = TypeTable.table
+        self.alias_list = []
+        self.type_def_queue = []
         self.queue = []
 
     def visitProgram(self, ctx):
@@ -39,38 +41,80 @@ class CCodeGen(HelloVisitor):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         lang_type = self.visitLang_type(ctx)
-        print(identifier, )
-        print(identifier, lang_type)
         SymbolTable.root_table
         type_id = self.current_scope.scope[identifier].variable_type
-        identifier_type = self.type_table[type_id]
-        self.getVariableType(type_id, ctx)
-        print(identifier_type)
-        # declaration = identifier_type.variable_type + " " + identifier
-        # if len(ctx.children) >= 6:
-        #     declaration += " = " + ctx.children[5].getText()
-        # self.queue.append((declaration + ";").encode('ascii', 'ignore'))
-        # print(self.queue)
-        return
-        # return self.visitChildren(ctx)
+        if ctx.children[3].getText() not in AliasType.table:
+            identifier_type = self.getVariableType(identifier, type_id, ctx)
+            if isinstance(self.type_table[type_id], ArrayType):
+                identifier_type += "[" + self.getArraySize(ctx) + "]"
+            elif isinstance(self.type_table[type_id], RecordType):
+                identifier_type = self.getVariableType(identifier, type_id, ctx) + ""
+        else:
+            identifier_type = ctx.children[3].getText()
 
-    def getVariableType(self, type_id, ctx):
-        print(self.type_table)
+        declaration = identifier_type + " " + identifier
+        self.queue.append((declaration + ";").encode('ascii', 'ignore'))
+        print(self.queue)
+        return
+
+    def getVariableType(self, identifier, type_id, ctx):
+        print(identifier)
+        # if identifier in self.alias_list:
+        #     return identifier
+
         if isinstance(self.type_table[type_id], PrimitiveType):
             return self.primitive_type_map[type_id]
         elif isinstance(self.type_table[type_id], ArrayType):
-            return self.getVariableType(self.type_table[type_id].nested_type_id, ctx) + "[" + self.getArraySize(ctx) + "]"
+            return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
         elif isinstance(self.type_table[type_id], RecordType):
-            return self.getVariableType(self.type_table[type_id].nested_type_id, ctx) + "[]"
+            return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
 
     def getArraySize(self, ctx):
-        print("Privet")
-        print(ctx.children[2].getText())
-        print(ctx.children[2].children[0].children[0].getText())
+        # print("Privet")
+        # print(ctx.children[3].getText())
+        print(ctx.children[0])
+
+        return ctx.getText().split('[')[1].split(']')[0]
+        # return ctx.children[3].children[0].children[0].children[2].getText()
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
+        # print(AliasType.table)
+        # print(AliasType.table[ctx.children[1].getText()])
+        # print(self.current_scope.scope)
+        # print(self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]])
+        type = self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]]
+        identifier = ctx.children[1].getText().encode('ascii', 'ignore')
+        print("id", identifier)
+        # print("Type: ", type)
+        array_size = 0
+        result = ""
+        if isinstance(type, ArrayType):
+            array_size = self.getArraySize(ctx)
+        alias_type = ""
+        if array_size != 0:
+            if identifier in self.alias_list:
+                alias_type = identifier
+            else:
+                alias_type = self.getVariableType(identifier,
+                    AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + "[" + array_size + "] " + \
+                     ctx.children[1].getText()
+            result = "typedef " + alias_type
+        else:
+            if identifier in AliasType.table:
+                alias_type = identifier
+            else:
+                alias_type = self.getVariableType(identifier,
+                    AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + \
+                     ctx.children[1].getText()
+            result = "typedef " + alias_type
 
+
+        print(array_size)
+        # result = "typedef " + self.getVariableType(AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + " " + ctx.children[1].getText()
+        self.type_def_queue.append(result.encode('ascii', 'ignore'))
+        self.alias_list.append(identifier)
+        print(self.type_def_queue)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#lang_type.
@@ -139,11 +183,6 @@ class CCodeGen(HelloVisitor):
         routine_declaration += "(" + args + ") {\n"
         self.queue.append(routine_declaration)
         print(routine_declaration)
-        # print(ctx.children[0])
-        # print(ctx.children[1])
-        # print(ctx.children[2].getText())
-        # print(ctx.children[3])
-        # print(ctx.children[4])
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent
         self.queue.append("}\n")
