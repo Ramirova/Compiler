@@ -1,10 +1,21 @@
 from HelloVisitor import HelloVisitor
+from SymbolTable import *
+from TypeTable import *
 import unicodedata
 
 
 class CCodeGen(HelloVisitor):
-    def __init__(self, symbol_table):
-        self.symbol_table = symbol_table
+
+
+
+    def __init__(self, args):
+        # self.code_file = open("c_code.c", "w+")
+        # self.code_file.write("#include <stdio.h>\n")
+        # self.code_file.write("int main()\n")
+        # self.code_file.write("{\n")\
+        self.current_scope = SymbolTable.root_table
+        self.type_table = TypeTable.table
+        self.queue = []
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -15,10 +26,24 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#variableDeclaration.
     def visitVariableDeclaration(self, ctx):
+        identifier = ctx.Identifier().getText()
+        identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+        lang_type = self.visitLang_type(ctx)
+        print(identifier, lang_type)
+        SymbolTable.root_table
+        type_id = self.current_scope.scope[identifier].variable_type
+        identifier_type = self.type_table[type_id]
+        print(identifier_type)
+        declaration = identifier_type + " " + identifier
+        if len(ctx.children) >= 6:
+            declaration += " = " + ctx.children[5].getText()
+        self.queue.append((declaration + ";").encode('ascii', 'ignore'))
+        print(self.queue)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
+
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#lang_type.
@@ -71,7 +96,10 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
-        return self.visitChildren(ctx)
+        self.current_scope = self.current_scope.child_scopes[ctx.children[1]]
+        visit_children = self.visitChildren(ctx)
+        self.current_scope = self.current_scope.parent
+        return visit_children
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):

@@ -1,12 +1,6 @@
-var kek: integer;
+var kek: integer is 5;
 
 routine lol(a: integer, b: integer) is
     var c: integer
     a := c + b
 end;
-
-routine cheburek is
-    var kiska: integer
-end;
-routine piska;
-routine mur;
