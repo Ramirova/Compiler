@@ -84,7 +84,7 @@ class CCodeGen(HelloVisitor):
                 alias_name = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        result = "typedef " + alias_name + " " + result
+        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
         print(self.type_def_queue)
