@@ -13,8 +13,8 @@ class CCodeGen(HelloVisitor):
 
     primitive_type_map = {
         1: "int",
-        0: "double",
-        2: "bool"
+        2: "double",
+        3: "bool"
     }
 
     def __init__(self, args):
