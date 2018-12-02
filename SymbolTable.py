@@ -52,6 +52,12 @@ class SymbolTable:
         else:
             return True
 
+    def is_defined_in_current_scope(self, variable_name):
+        if variable_name not in self.scope.keys():
+            return False
+        else:
+            return True
+
 
 class SymbolTableEntry:
     def __init__(self, used, variable_type, variable_name):
