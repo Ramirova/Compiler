@@ -23,8 +23,8 @@ class SymbolTable:
     def add(self, variable_name, variable_type):
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
-    def add_routine(self, routine_name):
-        self.routines[routine_name] = routine_name
+    def add_routine(self, routine_name, parameters, return_type):
+        self.routines[routine_name] = RoutineTableEntry(routine_name, parameters, return_type)
 
     def remove(self, variable_name):
         del self.scope[variable_name]
@@ -74,4 +74,12 @@ class SymbolTableEntry:
         self.variable_type = variable_type
         self.variable_name = variable_name
         # self.value = value
+
+
+class RoutineTableEntry:
+    def __init__(self, name, parameters, return_type):
+        self.name = name
+        self.parameters = parameters
+        self.return_type = return_type
+
 
