@@ -5,12 +5,11 @@ import unicodedata
 
 
 class CCodeGen(HelloVisitor):
-
     c_type_map = {
-            "integer" : "int",
-            "real": "double",
-            "boolean": "bool",
-        }
+        "integer": "int",
+        "real": "double",
+        "boolean": "bool",
+    }
 
     primitive_type_map = {
         1: "int",
@@ -19,10 +18,6 @@ class CCodeGen(HelloVisitor):
     }
 
     def __init__(self, args):
-        # self.code_file = open("c_code.c", "w+")
-        # self.code_file.write("#include <stdio.h>\n")
-        # self.code_file.write("int main()\n")
-        # self.code_file.write("{\n")\
         self.current_scope = SymbolTable.root_table
         self.type_table = TypeTable.table
         self.alias_list = []
@@ -40,7 +35,6 @@ class CCodeGen(HelloVisitor):
     def visitVariableDeclaration(self, ctx):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        lang_type = self.visitLang_type(ctx)
         SymbolTable.root_table
         type_id = self.current_scope.scope[identifier].variable_type
         if ctx.children[3].getText() not in AliasType.table:
@@ -58,11 +52,8 @@ class CCodeGen(HelloVisitor):
         return
 
     def getVariableType(self, identifier, type_id, ctx):
-        print(identifier)
-        # if identifier in self.alias_list:
-        #     return identifier
-
         if isinstance(self.type_table[type_id], PrimitiveType):
+            print self.primitive_type_map[type_id]
             return self.primitive_type_map[type_id]
         elif isinstance(self.type_table[type_id], ArrayType):
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
@@ -70,48 +61,35 @@ class CCodeGen(HelloVisitor):
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
 
     def getArraySize(self, ctx):
-        # print("Privet")
-        # print(ctx.children[3].getText())
-        print(ctx.children[0])
-
         return ctx.getText().split('[')[1].split(']')[0]
-        # return ctx.children[3].children[0].children[0].children[2].getText()
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
-        # print(AliasType.table)
-        # print(AliasType.table[ctx.children[1].getText()])
-        # print(self.current_scope.scope)
-        # print(self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]])
         type = self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]]
         identifier = ctx.children[1].getText().encode('ascii', 'ignore')
-        print("id", identifier)
-        # print("Type: ", type)
         array_size = 0
-        result = ""
+
         if isinstance(type, ArrayType):
             array_size = self.getArraySize(ctx)
         alias_type = ""
+        alias_name = ctx.children[3].children[0].children[0].children[4].getText().encode('ascii', 'ignore')
         if array_size != 0:
-            if identifier in self.alias_list:
-                alias_type = identifier
+            array_size = "[" + str(array_size) + "]"
+            if alias_name in AliasType.table:
+                alias_type = alias_name
             else:
                 alias_type = self.getVariableType(identifier,
-                    AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + "[" + array_size + "] " + \
-                     ctx.children[1].getText()
-            result = "typedef " + alias_type
+                                                  AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
+                                                  ctx.children[3])
+            result = "typedef " + alias_type + " " + ctx.children[1].getText() + array_size
         else:
-            if identifier in AliasType.table:
-                alias_type = identifier
+            if alias_name in AliasType.table:
+                alias_type = alias_name
             else:
                 alias_type = self.getVariableType(identifier,
-                    AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + \
-                     ctx.children[1].getText()
-            result = "typedef " + alias_type
-
-
-        print(array_size)
-        # result = "typedef " + self.getVariableType(AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')], ctx.children[3]) + " " + ctx.children[1].getText()
+                                                  AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
+                                                  ctx.children[3])
+            result = "typedef " + alias_type + " " + ctx.children[1].getText()
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
         print(self.type_def_queue)
@@ -182,10 +160,10 @@ class CCodeGen(HelloVisitor):
             args = args[:-2]
         routine_declaration += "(" + args + ") {\n"
         self.queue.append(routine_declaration)
-        print(routine_declaration)
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent
         self.queue.append("}\n")
+        print(self.queue)
         return visit_children
 
     # Visit a parse tree produced by HelloParser#parameters.
@@ -227,33 +205,6 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#modifiablePrimary.
     def visitModifiablePrimary(self, ctx):
-        # children = ctx.children
-        # print(children[0].getText())
-        # print(children[1].getText())
-        # print(children[2].getText())
-        # print(children[3].getText())
-        # function_calls = []
-        #
-        # if len(children) == 1:
-        #     identifier = children[0].getText()
-        #     identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        #     if not self.current_symbol_table.is_defined_in_scope(identifier):
-        #         raise Exception('Variable {} is not defined'.format(identifier))
-        # elif type(children[2]) is HelloParser.ExpressionContext:
-        #     array_identifier = children[0].getText()
-        #     array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
-        #     if not self.current_symbol_table.is_defined_in_scope(array_identifier):
-        #         raise Exception('Array with name {} is not defined'.format(array_identifier))
-        # else:
-        #     for i in range(len(children)):
-        #         if i % 2 == 0:
-        #             id = children[i].getText()
-        #             id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
-        #             # TODO check validity of record fields
-        #             # check that the first identifier is a declared variable with type record
-        #             if i == 0 and not self.current_symbol_table.is_defined_in_scope(id):
-        #                 raise Exception('Record with name {} is not defined'.format(id))
-        #             function_calls.append(id)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#eos.
