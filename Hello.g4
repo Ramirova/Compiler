@@ -222,7 +222,7 @@ fragment Exponent
     ;
 
 fragment DecimalLiteral
-    : [1-9]DecimalDigit*
+    : '0' | ([1-9]DecimalDigit*)
     ;
 
 fragment HexLiteral
