@@ -34,13 +34,18 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
+        id = ctx.Identifier().getText()
+        id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+        current_type = self.visitLang_type(ctx)
+
+        AliasType.table[id] = current_type
+
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#lang_type.
     def visitLang_type(self, ctx):
         return self.visitChildren(ctx)
-
-    # Visit a parse tree produced by HelloParser#primitiveType.
+ # Visit a parse tree produced by HelloParser#primitiveType.
     def visitPrimitiveType(self, ctx):
         c = ctx.children[0].getText()
         c = unicodedata.normalize('NFKD', c).encode('ascii', 'ignore')
