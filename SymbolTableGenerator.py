@@ -1,11 +1,13 @@
 from HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
 from HelloParser import HelloParser
+from TypeTable import *
 import unicodedata
 
 
 class SymbolTableGenerator(HelloVisitor):
     current_symbol_table = SymbolTable(parent=None)
+
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -19,13 +21,7 @@ class SymbolTableGenerator(HelloVisitor):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         lang_type = self.visitLang_type(ctx)
-        expression = None
         self.current_symbol_table.add(identifier, lang_type)
-        # if ctx.lang_type() is not None:
-        #     lang_type = self.visitLang_type(ctx)
-        # if lang_type is not None:
-        #     print("var ", identifier, ":", lang_type)
-        # print("var ", ctx.Identifier(), " is ", ctx.expression())
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
