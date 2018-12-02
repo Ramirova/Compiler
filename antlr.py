@@ -1,9 +1,11 @@
 from antlr4 import *
+
+from CCodeGen import CCodeGen
 from HelloLexer import HelloLexer
 from HelloListener import HelloListener
 from HelloParser import HelloParser
+
 from SymbolTableGenerator import SymbolTableGenerator
-import sys
 
 
 class HelloPrintListener(HelloListener):
@@ -17,8 +19,9 @@ def main():
     parser = HelloParser(stream)
     tree = parser.program()
     # printer = HelloPrintListener()
-    # printer = SymbolTableGenerator()
-    visitor = SymbolTableGenerator()
+    printer = SymbolTableGenerator()
+    printer = printer.visit(tree)
+    visitor = CCodeGen([])
     visitor.visit(tree)
     # walker = ParseTreeWalker()
     # walker.walk(printer, tree)
