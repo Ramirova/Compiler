@@ -20,6 +20,14 @@ class SymbolTable:
         else:
             return self.parent_scope.get_variable_info(variable_name)
 
+    def get_routine_info(self, routine_name):
+        if self.parent_scope is None and not self.routine_defined_in_scope(routine_name):
+            raise Exception('there is no {} routine defined'.format(routine_name))
+        if self.routine_defined_in_scope(routine_name):
+            return self.scope[routine_name]
+        else:
+            return self.parent_scope.get_routine_info(routine_name)
+
     def add(self, variable_name, variable_type):
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
