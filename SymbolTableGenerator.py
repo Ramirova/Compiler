@@ -44,7 +44,13 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#lang_type.
     def visitLang_type(self, ctx):
+        children = ctx.children
+        if len(children) > 3 and  hasattr(ctx.children[3], 'Identifier') and ctx.children[3].Identifier() is not None:
+            id = ctx.children[3].Identifier().getText()
+            id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+            return AliasType.table[id]
         return self.visitChildren(ctx)
+
  # Visit a parse tree produced by HelloParser#primitiveType.
     def visitPrimitiveType(self, ctx):
         c = ctx.children[0].getText()
@@ -219,9 +225,9 @@ class SymbolTableGenerator(HelloVisitor):
 
             type_id = self.current_symbol_table.get_variable_info(function_calls[0]).variable_type
             current_type = self.type_table.table[type_id]
-            for i in range(1, len(function_calls)-1):
+            for i in range(len(function_calls)-1):
                 if function_calls[i+1] not in current_type.inner_declarations.keys():
-                    raise Exception("Record {} doesn't have a field [{}".format(function_calls[i], function_calls[i+1]))
+                    raise Exception("Record {} doesn't have a field {}".format(function_calls[i], function_calls[i+1]))
                 type_id = current_type.inner_declarations[function_calls[i+1]]
                 current_type = self.type_table.table[type_id]
         return self.visitChildren(ctx)
