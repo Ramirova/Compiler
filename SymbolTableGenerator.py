@@ -8,6 +8,9 @@ import unicodedata
 class SymbolTableGenerator(HelloVisitor):
     current_symbol_table = SymbolTable(parent=None)
     type_table = TypeTable
+    type_table.table[1] = PrimitiveType()
+    type_table.table[2] = PrimitiveType()
+    type_table.table[3] = PrimitiveType()
 
     # todo check second time declaration
 
