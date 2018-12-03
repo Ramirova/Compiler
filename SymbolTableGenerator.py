@@ -12,6 +12,9 @@ class SymbolTableGenerator(HelloVisitor):
     type_table.table[2] = PrimitiveType()
     type_table.table[3] = PrimitiveType()
 
+    def unicode_to_str(self, unicode_str):
+        return unicodedata.normalize('NFKD', unicode_str).encode('ascii', 'ignore')
+
     def visitProgram(self, ctx):
         a = self.visitChildren(ctx)
         return a
@@ -180,12 +183,33 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#relation.
     def visitRelation(self, ctx):
+        children = ctx.children
+        relation_type = self.visitFactor(children[0])
+        if len(children) <= 1:
+            return self.visitChildren(ctx)
+
         type = 'boolean'
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#simple.
     def visitSimple(self, ctx):
-        return self.visitChildren(ctx)
+        children = ctx.children
+        simple_type = self.visitFactor(children[0])
+        if len(children) <= 1:
+            return self.visitChildren(ctx)
+        operator = children[1]
+        if operator is not  None:
+            left = children[0]
+            right = children[2]
+            operator_text = self.unicode_to_str(operator.getText())
+            if operator_text == '*':
+                simple_type = TypeUtils.deduce_type(self.visitFactor(left), self.visitFactor(right))
+            elif operator_text == '/':
+                simple_type = TypeUtils.deduce_type_division(self.visitFactor(left), self.visitFactor(right))
+            elif operator_text == '%':
+                simple_type = TypeUtils.deduce_type_module(self.visitFactor(left), self.visitFactor(right))
+        self.visitChildren(ctx)
+        return simple_type
 
     # Visit a parse tree produced by HelloParser#factor.
     def visitFactor(self, ctx):
