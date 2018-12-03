@@ -111,7 +111,12 @@ class SymbolTableGenerator(HelloVisitor):
         rhs = ctx.expression()
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
-        if lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
+        if TypeTable.get_type(lhs_type) == 'ArrayType':
+            if TypeTable.table[lhs_type].nested_type_id != rhs_type:
+                raise Exception('Cannot assign {} to array with elements of type {}'.format(rhs_type, lhs_type))
+            else:
+                return self.visitChildren(ctx)
+        elif lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
             raise Exception('Cannot assign type real to boolean variable')
         elif not TypeUtils.are_compatible(lhs_type, rhs_type):
             raise Exception('Types {} and {} are not compatible for assignment'.format(TypeTable.get_type(lhs_type),
@@ -160,7 +165,20 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
-        return self.visitChildren(ctx)
+        children = ctx.children
+        self.current_symbol_table = self.current_symbol_table.create_child_scope('if')
+        if self.visitExpression(children[1]) != PrimitiveType.boolean:
+            raise Exception("Condition of if statement is not boolean")
+        self.visitExpression(children[1])
+        recur = self.visitBody(children[3])
+        self.current_symbol_table = self.current_symbol_table.parent_scope
+        self.current_symbol_table.remove_child_scope('if')
+        if len(children) > 5:
+            self.current_symbol_table = self.current_symbol_table.create_child_scope('else')
+            recur = self.visitBody(children[5])
+            self.current_symbol_table = self.current_symbol_table.parent_scope
+            self.current_symbol_table.remove_child_scope('else')
+
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
