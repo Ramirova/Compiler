@@ -1,1 +1,1 @@
-var my_array : array[3] integer;
+var a: integer is true;

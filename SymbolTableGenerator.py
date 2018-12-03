@@ -25,19 +25,23 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#variableDeclaration.
     def visitVariableDeclaration(self, ctx):
+        children = ctx.children
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        lang_type = self.visitLang_type(ctx)
+        lang_type = self.visitChildren(ctx)
+        if len(children) > 4:
+            lang_type = self.visitLang_type(children[3])
+        final_type = lang_type
+        expression = ctx.expression()
         if self.current_symbol_table.is_defined_in_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
-        if lang_type is None:
-            expression = ctx.expression()
-            expr_children = expression.children
-            if len(expr_children) > 1:
-                lang_type = PrimitiveType.types['boolean']
-            elif expr_children[0].children > 1:
-                lang_type = PrimitiveType.types['boolean']
-        self.current_symbol_table.add(identifier, lang_type)
+        if lang_type is None:  # 'var' Identifier'is'expression
+            final_type = self.visitExpression(expression)
+        elif lang_type is not None and expression is not None:  # 'var' Identifier ':' lang_type 'is' expression
+            expression_type = self.visitExpression(expression)
+            if lang_type != expression_type:
+                raise Exception('Incompatible types in variable declaration {} '.format(identifier))
+        self.current_symbol_table.add(identifier, final_type)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
@@ -57,6 +61,8 @@ class SymbolTableGenerator(HelloVisitor):
             id = ctx.children[3].Identifier().getText()
             id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
             return AliasType.table[id]
+        if len(children) == 1 and self.unicode_to_str(children[0].getText()) in AliasType.table.keys():
+            return AliasType.table[children[0].getText()]
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#primitiveType.
@@ -178,8 +184,20 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
-        type = 'boolean'
-        return self.visitChildren(ctx)
+        children = ctx.children
+        if len(children) <= 1:
+            expression_type = self.visitChildren(ctx)
+            print expression_type
+            return expression_type
+        left_type = self.visitChildren(children[0])
+        right_type = self.visitChildren(children[2])
+        if left_type != PrimitiveType.boolean or right_type != PrimitiveType.boolean:
+            raise Exception('Incompatible types {} and {} in expression, can be applied to boolean only'.format(
+                TypeTable.get_type(left_type), TypeTable.get_type(right_type)))
+        self.visitChildren(ctx)
+        expression_type = PrimitiveType.boolean
+        print expression_type
+        return expression_type
 
     # Visit a parse tree produced by HelloParser#relation.
     def visitRelation(self, ctx):
@@ -187,9 +205,11 @@ class SymbolTableGenerator(HelloVisitor):
         relation_type = self.visitFactor(children[0])
         if len(children) <= 1:
             return self.visitChildren(ctx)
-
-        type = 'boolean'
-        return self.visitChildren(ctx)
+        left = children[0]
+        right = children[2]
+        TypeUtils.deduce_type_comparable(self.visitFactor(left), self.visitFactor(right))
+        self.visitChildren(ctx)
+        return PrimitiveType.boolean
 
     # Visit a parse tree produced by HelloParser#simple.
     def visitSimple(self, ctx):
@@ -198,7 +218,7 @@ class SymbolTableGenerator(HelloVisitor):
         if len(children) <= 1:
             return self.visitChildren(ctx)
         operator = children[1]
-        if operator is not  None:
+        if operator is not None:
             left = children[0]
             right = children[2]
             operator_text = self.unicode_to_str(operator.getText())
@@ -221,6 +241,9 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#summand.
     def visitSummand(self, ctx):
+        children = ctx.children
+        if len(children) == 3:
+            return self.visitChildren(children[1])
         c = self.visitChildren(ctx)
         return c
 
