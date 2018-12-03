@@ -107,6 +107,15 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#assignment.
     def visitAssignment(self, ctx):
+        lhs = ctx.modifiablePrimary()
+        rhs = ctx.expression()
+        lhs_type = self.visitModifiablePrimary(lhs)
+        rhs_type = self.visitExpression(rhs)
+        if lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
+            raise Exception('Cannot assign type real to boolean variable')
+        elif not TypeUtils.are_compatible(lhs_type, rhs_type):
+            raise Exception('Types {} and {} are not compatible for assignment'.format(TypeTable.get_type(lhs_type),
+                                                                                       TypeTable.get_type(rhs_type)))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
@@ -133,6 +142,13 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#lang_range.
     def visitLang_range(self, ctx):
+        children = ctx.children
+        start_range = children[0]
+        end_range = children[2]
+        start_type = self.visitExpression(start_range)
+        end_type = self.visitExpression(end_range)
+        if start_type != PrimitiveType.integer or end_type != PrimitiveType.integer:
+            raise Exception('Range boundaries are not integer numbers')
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#ifStatement.
