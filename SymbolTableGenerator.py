@@ -86,7 +86,6 @@ class SymbolTableGenerator(HelloVisitor):
                 var_name = unicodedata.normalize('NFKD', c.children[1].getText()).encode('ascii', 'ignore')
                 var_type = self.visitLang_type(c)
                 record_variables[var_name] = var_type
-        recur = self.visitChildren(ctx)
         new_type = RecordType(record_variables)
         self.current_symbol_table = self.current_symbol_table.parent_scope
         self.current_symbol_table.remove_child_scope('current_record')
@@ -194,7 +193,6 @@ class SymbolTableGenerator(HelloVisitor):
                 parameters[id] = t
         else:
             parameters = None
-        peremennaya = self.visitChildren(ctx)
         if ctx.lang_type() is not None:
             return_type = self.visitLang_type(ctx.lang_type())
             if ctx.expression() is None:
@@ -213,7 +211,6 @@ class SymbolTableGenerator(HelloVisitor):
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
 
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        return peremennaya
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
