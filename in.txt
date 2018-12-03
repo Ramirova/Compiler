@@ -1,2 +1,1 @@
-var a : record var b : integer end;
-
+routine a is var a : record var b : integer end end;

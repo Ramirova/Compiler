@@ -17,12 +17,16 @@ class CCodeGen(HelloVisitor):
         3: "bool"
     }
 
+
     def __init__(self, args):
         self.current_scope = SymbolTable.root_table
         self.type_table = TypeTable.table
         self.alias_list = []
         self.type_def_queue = []
         self.queue = []
+        self.current_queue = self.queue
+        self.record_state = False
+        self.current_record = ""
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -36,20 +40,40 @@ class CCodeGen(HelloVisitor):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         SymbolTable.root_table
-        type_id = self.current_scope.scope[identifier].variable_type
+        if self.record_state:
+            record_scope_id = self.current_scope.scope[self.current_record].variable_type
+            type_id = self.type_table[record_scope_id].inner_declarations[identifier]
+            print(type_id)
+            # type_id = self.type_table[]
+        else:
+            type_id = self.current_scope.scope[identifier].variable_type
         if ctx.children[3].getText() not in AliasType.table:
             identifier_type = self.getVariableType(identifier, type_id, ctx)
             if isinstance(self.type_table[type_id], ArrayType):
                 identifier_type += "[" + self.getArraySize(ctx) + "]"
             elif isinstance(self.type_table[type_id], RecordType):
+                print("qq", ctx.children[3].children[0].children[0].children[1].getText())
+                self.record_state = True
+                self.current_queue = self.type_def_queue
+                self.current_record = identifier
+                self.current_record = identifier
+                self.current_queue.append(("typedef struct " + identifier + "_type {\n").encode('ascii', 'ignore'))
                 self.visitChildren(ctx.children[3])
-                identifier_type = ""
+                self.record_state = False
+                self.current_record = ""
+                self.current_queue.append(("};").encode('ascii', 'ignore'))
+                self.current_queue = self.queue
+                self.current_queue.append(identifier + "_type " + identifier + ";")
+                print(self.type_def_queue)
+                print(self.queue)
+                return
+                # identifier_type = id
         else:
             identifier_type = ctx.children[3].getText()
 
-        print(identifier)
-        print("ctx size: ", len(ctx.children))
-        print(ctx.children[2])
+        # print(identifier)
+        # print("ctx size: ", len(ctx.children))
+        # print(ctx.children[2])
 
         post_declaration = ""
         if ctx.children[2].getText() == "is":
@@ -59,8 +83,8 @@ class CCodeGen(HelloVisitor):
             post_declaration = " = " + ctx.children[5].getText()
 
         declaration = identifier_type + " " + identifier + post_declaration
-        self.queue.append((declaration + ";").encode('ascii', 'ignore'))
-        print(self.queue)
+        self.current_queue.append((declaration + ";").encode('ascii', 'ignore'))
+        print(self.current_queue)
         return
 
     def getVariableType(self, identifier, type_id, ctx):
@@ -116,13 +140,15 @@ class CCodeGen(HelloVisitor):
     def visitUserType(self, ctx):
         return self.visitChildren(ctx)
 
-    #- Visit a parse tree produced by HelloParser#recordType.
+    # Visit a parse tree produced by HelloParser#recordType.
     def visitRecordType(self, ctx):
-        print(ctx.getText())
-        print(ctx.children[0].getText())
-        print(ctx.children[1].getText())
-        print(ctx.children[2].getText())
-        result = "struct " + ctx.children[0].getText()
+        # print(ctx.getText())
+        # print(ctx.children[0].getText())
+        # print(ctx.children[1].getText())
+        # print(ctx.children[2].getText())
+        print("End record declaration, go to variable declaration")
+        # self.queue.append(("struct " + ctx.children[0].getText()).encode('ascii', 'ignore'))
+        self.record_state = True
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#arrayType.
@@ -135,12 +161,12 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#assignment.
     def visitAssignment(self, ctx):
-        self.queue.append((ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
+        self.current_queue.append((ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
-        self.queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
+        self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
         return self.visitChildren(ctx)
 
     #- Visit a parse tree produced by HelloParser#whileLoop.
@@ -158,35 +184,35 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
-        self.queue.append("if (" + self.expressionToString(self.visitExpression(ctx.children[1])) + ") {\n")
+        self.current_queue.append("if (" + self.expressionToString(self.visitExpression(ctx.children[1])) + ") {\n")
         self.visitBody(ctx.children[3])
-        self.queue.append("}\n")
+        self.current_queue.append("}\n")
         return
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
-        routine_declaration = ""
-        routine_declaration = "void " + ctx.children[1].getText() + " "
+        routine_declaration = "void " + ctx.children[1].getText()
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        for arg in routine_args:
-            name = arg.split(":")[0]
-            type = arg.split(":")[1]
-            type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
-            arg_type = self.type_table[type_id]
-            if isinstance(arg_type, PrimitiveType):
-                args += self.primitive_type_map[type_id] + " " + name + ", "
-            else:
-                args += self.c_type_map[arg_type] + " " + name + ", "
+        if ":" in routine_args > 0:
+            for arg in routine_args:
+                name = arg.split(":")[0]
+                type = arg.split(":")[1]
+                type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
+                arg_type = self.type_table[type_id]
+                if isinstance(arg_type, PrimitiveType):
+                    args += self.primitive_type_map[type_id] + " " + name + ", "
+                else:
+                    args += self.c_type_map[arg_type] + " " + name + ", "
         if args is not "":
             args = args[:-2]
         routine_declaration += "(" + args + ") {\n"
-        self.queue.append(routine_declaration.encode('ascii', 'ignore'))
+        self.current_queue.append(routine_declaration.encode('ascii', 'ignore'))
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
-        self.queue.append("}\n")
-        print(self.queue)
+        self.current_queue.append("}\n")
+        print(self.current_queue)
         return visit_children
 
     # Visit a parse tree produced by HelloParser#parameters.
