@@ -96,6 +96,9 @@ class SymbolTableGenerator(HelloVisitor):
     def visitArrayType(self, ctx):
         nested_type = self.visitChildren(ctx)
         new_type = ArrayType(nested_type)
+        expression = ctx.children[2]
+        if self.visitExpression(expression) != PrimitiveType.integer:
+            raise Exception('Array size can only be integer')
         return new_type.get_id()
 
     # Visit a parse tree produced by HelloParser#statement.
