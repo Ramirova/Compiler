@@ -27,6 +27,7 @@ class CCodeGen(HelloVisitor):
         self.current_queue = self.queue
         self.record_state = False
         self.current_record = ""
+        self.number_of_loops = 0
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -136,7 +137,7 @@ class CCodeGen(HelloVisitor):
     def visitPrimitiveType(self, ctx):
         return self.visitChildren(ctx)
 
-    #- Visit a parse tree produced by HelloParser#userType.
+    # Visit a parse tree produced by HelloParser#userType.
     def visitUserType(self, ctx):
         return self.visitChildren(ctx)
 
@@ -155,7 +156,7 @@ class CCodeGen(HelloVisitor):
     def visitArrayType(self, ctx):
         return self.visitChildren(ctx)
 
-    #- Visit a parse tree produced by HelloParser#statement.
+    # Visit a parse tree produced by HelloParser#statement.
     def visitStatement(self, ctx):
         return self.visitChildren(ctx)
 
@@ -169,16 +170,29 @@ class CCodeGen(HelloVisitor):
         self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
         return self.visitChildren(ctx)
 
-    #- Visit a parse tree produced by HelloParser#whileLoop.
+    # Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
-        return self.visitChildren(ctx)
+        self.current_queue.append("while (" + self.expressionToString(self.visitExpression(ctx.children[1]))
+                                  + ")" + " {")
+        self.visitChildren(ctx)
+        self.current_queue.append("}\n")
+        return
 
-    #- Visit a parse tree produced by HelloParser#forLoop.
+    # Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
+        self.number_of_loops += 1
+        self.current_queue.append(("int " + ctx.children[1].getText() +
+                                   " = " + ctx.children[3].getText().split("..")[0]).encode('ascii', 'ignore'))
+        iterator = ctx.children[1].getText()
+        loop_range = ctx.children[3].getText().split("..")
+        self.current_queue.append(("for (int " + iterator + " = " + loop_range[0] + "; "
+                                   + iterator + " < " + loop_range[1] + "; " + iterator + "++) {\n").encode('ascii', 'ignore'))
         print(ctx.getText())
-        return self.visitChildren(ctx)
+        self.visitChildren(ctx)
+        self.current_queue.append("}\n")
+        return
 
-    #- Visit a parse tree produced by HelloParser#lang_range.
+    # Visit a parse tree produced by HelloParser#lang_range.
     def visitLang_range(self, ctx):
         return self.visitChildren(ctx)
 
@@ -223,7 +237,7 @@ class CCodeGen(HelloVisitor):
     def visitParameterDeclaration(self, ctx):
         return self.visitChildren(ctx)
 
-    #- Visit a parse tree produced by HelloParser#body.
+    # Visit a parse tree produced by HelloParser#body.
     def visitBody(self, ctx):
         return self.visitChildren(ctx)
 
