@@ -166,5 +166,13 @@ class TypeUtils:
         raise Exception('cannot take module for {} and {}. Module can only be applied to integer values'
                         .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
 
+    @staticmethod
+    def deduce_type_comparable(type_id_1, type_id_2):
+        if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
+            return True
+        raise Exception("Incompatible types {} and {} for comparison. This operator can only be applied to primitive"
+                        " types".format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+
+
 
 
