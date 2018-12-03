@@ -130,15 +130,22 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
-        return self.visitChildren(ctx)
+        self.current_symbol_table = self.current_symbol_table.create_child_scope('while')
+        recur = self.visitChildren(ctx)
+        self.current_symbol_table = self.current_symbol_table.parent_scope
+        self.current_symbol_table.remove_child_scope('while')
+        return recur
 
     # Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
+        self.current_symbol_table = self.current_symbol_table.create_child_scope('for')
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        if not self.current_symbol_table.is_defined_in_scope(identifier):
-            raise Exception('Variable {} is not defined'.format(identifier))
-        return self.visitChildren(ctx)
+        self.current_symbol_table.add(identifier, PrimitiveType.integer)
+        recur = self.visitChildren(ctx)
+        self.current_symbol_table = self.current_symbol_table.parent_scope
+        self.current_symbol_table.remove_child_scope('for')
+        return recur
 
     # Visit a parse tree produced by HelloParser#lang_range.
     def visitLang_range(self, ctx):
