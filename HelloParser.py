@@ -392,11 +392,7 @@ class HelloParser ( Parser ):
             else:
                 return visitor.visitChildren(self)
 
-
-
-
     def simpleDeclaration(self):
-
         localctx = HelloParser.SimpleDeclarationContext(self, self._ctx, self.state)
         self.enterRule(localctx, 2, self.RULE_simpleDeclaration)
         try:

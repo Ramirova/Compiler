@@ -42,10 +42,23 @@ class CCodeGen(HelloVisitor):
             if isinstance(self.type_table[type_id], ArrayType):
                 identifier_type += "[" + self.getArraySize(ctx) + "]"
             elif isinstance(self.type_table[type_id], RecordType):
-                identifier_type = self.getVariableType(identifier, type_id, ctx) + ""
+                self.visitChildren(ctx.children[3])
+                identifier_type = ""
         else:
             identifier_type = ctx.children[3].getText()
-        declaration = identifier_type + " " + identifier
+
+        print(identifier)
+        print("ctx size: ", len(ctx.children))
+        print(ctx.children[2])
+
+        post_declaration = ""
+        if ctx.children[2].getText() == "is":
+            post_declaration = " = " + ctx.children[3].getText()
+
+        if len(ctx.children) > 4:
+            post_declaration = " = " + ctx.children[5].getText()
+
+        declaration = identifier_type + " " + identifier + post_declaration
         self.queue.append((declaration + ";").encode('ascii', 'ignore'))
         print(self.queue)
         return
@@ -57,6 +70,7 @@ class CCodeGen(HelloVisitor):
         elif isinstance(self.type_table[type_id], ArrayType):
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
         elif isinstance(self.type_table[type_id], RecordType):
+            return
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
 
     def getArraySize(self, ctx):
@@ -98,45 +112,56 @@ class CCodeGen(HelloVisitor):
     def visitPrimitiveType(self, ctx):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#userType.
+    #- Visit a parse tree produced by HelloParser#userType.
     def visitUserType(self, ctx):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#recordType.
+    #- Visit a parse tree produced by HelloParser#recordType.
     def visitRecordType(self, ctx):
+        print(ctx.getText())
+        print(ctx.children[0].getText())
+        print(ctx.children[1].getText())
+        print(ctx.children[2].getText())
+        result = "struct " + ctx.children[0].getText()
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#arrayType.
     def visitArrayType(self, ctx):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#statement.
+    #- Visit a parse tree produced by HelloParser#statement.
     def visitStatement(self, ctx):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#assignment.
     def visitAssignment(self, ctx):
+        self.queue.append((ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
+        self.queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#whileLoop.
+    #- Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#forLoop.
+    #- Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
+        print(ctx.getText())
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#lang_range.
+    #- Visit a parse tree produced by HelloParser#lang_range.
     def visitLang_range(self, ctx):
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
-        return self.visitChildren(ctx)
+        self.queue.append("if (" + self.expressionToString(self.visitExpression(ctx.children[1])) + ") {\n")
+        self.visitBody(ctx.children[3])
+        self.queue.append("}\n")
+        return
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
@@ -150,13 +175,16 @@ class CCodeGen(HelloVisitor):
             type = arg.split(":")[1]
             type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
             arg_type = self.type_table[type_id]
-            args += self.c_type_map[arg_type] + " " + name + ", "
+            if isinstance(arg_type, PrimitiveType):
+                args += self.primitive_type_map[type_id] + " " + name + ", "
+            else:
+                args += self.c_type_map[arg_type] + " " + name + ", "
         if args is not "":
             args = args[:-2]
         routine_declaration += "(" + args + ") {\n"
-        self.queue.append(routine_declaration)
+        self.queue.append(routine_declaration.encode('ascii', 'ignore'))
         visit_children = self.visitChildren(ctx)
-        self.current_scope = self.current_scope.parent
+        self.current_scope = self.current_scope.parent_scope
         self.queue.append("}\n")
         print(self.queue)
         return visit_children
@@ -169,7 +197,7 @@ class CCodeGen(HelloVisitor):
     def visitParameterDeclaration(self, ctx):
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by HelloParser#body.
+    #- Visit a parse tree produced by HelloParser#body.
     def visitBody(self, ctx):
         return self.visitChildren(ctx)
 
@@ -178,7 +206,8 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
-        return ctx.getText().replace("and", "&&").replace("xor", "^").replace("/=", "!=").replace("or", "||")
+
+        return ctx.getText().replace("and", "&&").replace("xor", "^").replace("/=", "!=").replace("or", "||").replace("=", "==").encode('ascii', 'ignore')
         # return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#relation.

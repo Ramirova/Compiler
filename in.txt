@@ -1,3 +1,2 @@
-type a is array[3] integer;
-type b is array[4] a;
-var my_array : b;
+var a : record var b : integer end;
+
