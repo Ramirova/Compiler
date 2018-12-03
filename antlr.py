@@ -21,8 +21,8 @@ def main():
     # printer = HelloPrintListener()
     printer = SymbolTableGenerator()
     printer = printer.visit(tree)
-    visitor = CCodeGen([])
-    visitor.visit(tree)
+    # visitor = CCodeGen([])
+    # visitor.visit(tree)
     # walker = ParseTreeWalker()
     # walker.walk(printer, tree)
 

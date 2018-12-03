@@ -20,11 +20,19 @@ class SymbolTable:
         else:
             return self.parent_scope.get_variable_info(variable_name)
 
+    def get_routine_info(self, routine_name):
+        if self.parent_scope is None and not self.routine_defined_in_scope(routine_name):
+            raise Exception('there is no {} routine defined'.format(routine_name))
+        if self.routine_defined_in_scope(routine_name):
+            return self.routines[routine_name]
+        else:
+            return self.parent_scope.get_routine_info(routine_name)
+
     def add(self, variable_name, variable_type):
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
-    def add_routine(self, routine_name):
-        self.routines[routine_name] = routine_name
+    def add_routine(self, routine_name, parameters, return_type):
+        self.routines[routine_name] = RoutineTableEntry(routine_name, parameters, return_type)
 
     def remove(self, variable_name):
         del self.scope[variable_name]
@@ -74,4 +82,12 @@ class SymbolTableEntry:
         self.variable_type = variable_type
         self.variable_name = variable_name
         # self.value = value
+
+
+class RoutineTableEntry:
+    def __init__(self, name, parameters, return_type):
+        self.name = name
+        self.parameters = parameters
+        self.return_type = return_type
+
 
