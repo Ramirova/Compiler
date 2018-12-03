@@ -24,7 +24,7 @@ class TypeTable:
     def get_type(type_id):
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
-        return type(TypeTable.table[type_id])
+        return TypeTable.table[type_id].__class__.__name__
 
 
 class PrimitiveType:
