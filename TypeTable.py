@@ -130,6 +130,35 @@ class TypeUtils:
             return PrimitiveType.real
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.integer
-        raise Exception("Incompatible types {} and {}".format(type_id_1, type_id_2))
+        raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
+                        .format(type_id_1, type_id_2))
+
+    @staticmethod
+    def deduce_type_division(type_id_1, type_id_2):
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.real \
+                or type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.boolean \
+                or type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.real:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.real and type_id_2 == PrimitiveType.boolean \
+                or type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.real:
+            return PrimitiveType.real
+        if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
+            return PrimitiveType.boolean
+        raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
+                        .format(type_id_1, type_id_2))
+
+    @staticmethod
+    def deduce_type_module(type_id_1, type_id_2):
+        if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
+            return PrimitiveType.integer
+        raise Exception('cannot take module for {} and {}. Module can only be applied to integer values'
+                        .format(type_id_1, type_id_2))
+
 
 
