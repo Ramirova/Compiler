@@ -20,6 +20,12 @@ class TypeTable:
     def add_type(type_id, type_content):
         TypeTable.table[type_id] = type_content
 
+    @staticmethod
+    def get_type(type_id):
+        if type_id not in TypeTable.table.keys():
+            raise Exception("cannot find type with id {}".format(type_id))
+        return type(TypeTable.table[type_id])
+
 
 class PrimitiveType:
     """
@@ -131,7 +137,7 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.integer
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(type_id_1, type_id_2))
+                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
 
     @staticmethod
     def deduce_type_division(type_id_1, type_id_2):
@@ -151,14 +157,14 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.boolean
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(type_id_1, type_id_2))
+                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
 
     @staticmethod
     def deduce_type_module(type_id_1, type_id_2):
         if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
             return PrimitiveType.integer
         raise Exception('cannot take module for {} and {}. Module can only be applied to integer values'
-                        .format(type_id_1, type_id_2))
+                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
 
 
 
