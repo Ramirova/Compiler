@@ -23,7 +23,7 @@ class SymbolTable:
     def get_routine_info(self, routine_name):
         if self.parent_scope is None and not self.routine_defined_in_scope(routine_name):
             raise Exception('there is no {} routine defined'.format(routine_name))
-        if self.routine_defined_in_scope(routine_name):
+        if self.routine_defined_in_current_scope(routine_name):
             return self.routines[routine_name]
         else:
             return self.parent_scope.get_routine_info(routine_name)
@@ -49,6 +49,12 @@ class SymbolTable:
 
     def remove_child_scope(self, scope_name):
         del self.child_scopes[scope_name]
+
+    def routine_defined_in_current_scope(self, routine_name):
+        if routine_name not in self.routines.keys():
+            return False
+        else:
+            return True
 
     def routine_defined_in_scope(self, routine_name):
         if routine_name not in self.routines.keys():
