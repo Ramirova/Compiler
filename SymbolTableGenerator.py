@@ -384,7 +384,6 @@ class SymbolTableGenerator(HelloVisitor):
             return self.visitSimple(children[0])
 
         #  if both relations are present check their type compatibility
-        left = children[0]
         left_type = self.visitSimple(children[0])
         right_type = self.visitSimple(children[2])
         TypeUtils.deduce_type_comparable(left_type, right_type)
@@ -398,7 +397,7 @@ class SymbolTableGenerator(HelloVisitor):
 
         #  if one child get and return type
         if len(children) <= 1:
-            return self.visitFactor(ctx)
+            return simple_type
 
         #  get operator
         operator = children[1]
@@ -418,19 +417,32 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#factor.
     def visitFactor(self, ctx):
+        #  getting context children
         children = ctx.children
         factor_type = self.visitSummand(children[0])
+
+        #  if one child get and return type
+        if len(children) <= 1:
+            return factor_type
+
+        #  if both relations are present check their type compatibility
         if len(children) > 1:
-            factor_type = TypeUtils.deduce_type(self.visitSummand(children[0]), self.visitSummand(children[2]))
+            left = children[0]
+            right = children[2]
+            factor_type = TypeUtils.deduce_type(self.visitSummand(left), self.visitSummand(right))
         return factor_type
 
     # Visit a parse tree produced by HelloParser#summand.
     def visitSummand(self, ctx):
+        #   getting context children
         children = ctx.children
+        summand_type = self.visitChildren(ctx)
+
+        #  if summand is an expression
         if len(children) == 3:
-            return self.visitChildren(children[1])
-        c = self.visitChildren(ctx)
-        return c
+            return self.visitExpression(children[1])
+
+        return summand_type
 
     # Visit a parse tree produced by HelloParser#primary.
     def visitPrimary(self, ctx):

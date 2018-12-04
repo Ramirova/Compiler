@@ -243,9 +243,11 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the while loop
         :return: the result of the visit all its children
         """
+        self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.current_queue.append("while (" + self.expressionToString(self.visitExpression(ctx.children[1]))
                                   + ")" + " {")
         self.visitChildren(ctx)
+        self.current_scope = self.current_scope.parent_scope
         self.current_queue.append("}\n")
         return
 
@@ -255,6 +257,7 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the for loop
         :return: the result of the visit all its children
         """
+        self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.number_of_loops += 1
         self.current_queue.append(("int " + ctx.children[1].getText() +
                                    " = " + ctx.children[3].getText().split("..")[0]).encode('ascii', 'ignore'))
@@ -265,6 +268,7 @@ class CCodeGen(HelloVisitor):
                                                                                                             'ignore'))
         print(ctx.getText())
         self.visitChildren(ctx)
+        self.current_scope = self.current_scope.parent_scope
         self.current_queue.append("}\n")
         return
 
@@ -283,9 +287,9 @@ class CCodeGen(HelloVisitor):
         :return: the result of the visit all its children
         """
         self.current_queue.append("if (" + self.expressionToString(self.visitExpression(ctx.children[1])) + ") {\n")
-        # self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
+        self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.visitBody(ctx.children[3])
-        # self.current_scope = self.current_scope.parent_scope
+        self.current_scope = self.current_scope.parent_scope
         self.current_queue.append("}\n")
         return
 
@@ -322,8 +326,13 @@ class CCodeGen(HelloVisitor):
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
 
-        if len(ctx.children) >= 6 and ctx.children[6].getText() == "return":
-            self.current_queue.append(("return " + ctx.children[7].getText()).encode('ascii', 'ignore'))
+        print("qqqq", ctx.children[7].getText())
+        return_index = -1
+        for child in range(len(ctx.children)):
+            if ctx.children[child].getText() == "return":
+                return_index = child
+        if len(ctx.children) >= 7 and return_index != -1:
+            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore'))
         self.current_queue.append(";\n}\n")
         print(self.current_queue)
         return visit_children

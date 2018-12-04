@@ -1,15 +1,17 @@
 #include <stdio.h>
 
-int bubble_sort() {
-int start_loop = 1;
-return start_loop;
+void init_and_start() {
+int e1 = 1;
+return e1;
 }
+int[3] my_array;
+int res = init_and_start(my_array);
 
 int main (int argc, char *argv[]) {
 if argc > 0 {
 switch(argv[0]) {
-case bubble_sort:
-bubble_sort(argv)
+case init_and_start:
+init_and_start(argv)
 break;
 default:
  break;

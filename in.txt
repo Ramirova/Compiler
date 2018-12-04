@@ -1,5 +1,7 @@
-routine bubble_sort: integer is
-    var start_loop : integer is 1
-    return start_loop
-end;
+routine init_and_start(a: array[3] integer): integer is
+    var e1 : integer is 1
+    return e1
+    end;
 
+var my_array : array[3] integer;
+var res is init_and_start(my_array);
