@@ -37,7 +37,7 @@ class SymbolTableGenerator(HelloVisitor):
             lang_type = self.visitLang_type(children[3])
         final_type = lang_type
         expression = ctx.expression()
-        if self.current_symbol_table.is_defined_in_scope(identifier):
+        if self.current_symbol_table.is_defined_in_current_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
         if lang_type is None:  # 'var' Identifier'is'expression
             final_type = self.visitExpression(expression)
@@ -173,7 +173,6 @@ class SymbolTableGenerator(HelloVisitor):
         self.current_symbol_table = self.current_symbol_table.create_child_scope('if')
         if self.visitExpression(children[1]) != PrimitiveType.boolean:
             raise Exception("Condition of if statement is not boolean")
-        self.visitExpression(children[1])
         recur = self.visitBody(children[3])
         self.current_symbol_table = self.current_symbol_table.parent_scope
         self.current_symbol_table.remove_child_scope('if')
@@ -346,7 +345,7 @@ class SymbolTableGenerator(HelloVisitor):
             return self.current_symbol_table.get_variable_info(identifier).variable_type
         elif type(children[2]) is HelloParser.ExpressionContext:
             array_identifier = children[0].getText()
-            array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
+            array_idenIftifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
             return TypeTable.get_type(
