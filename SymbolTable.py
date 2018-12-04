@@ -3,6 +3,7 @@ class SymbolTable:
     This class represents symbol table. It supports supports a hierarchy of tables, that correspond to
     """
     root_table = None
+    inner_scope_name = 'inner_scope_'
 
     def __init__(self, parent):
         if parent is None and SymbolTable.root_table is None:
@@ -47,6 +48,12 @@ class SymbolTable:
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
     def add_routine(self, routine_name, parameters, return_type):
+        """
+        :param routine_name:
+        :param parameters: an o
+        :param return_type:
+        :return:
+        """
         if not self.is_root_table():
             raise Exception('Routines can only be added to the global scope, i.e. to the root table')
         self.routines[routine_name] = RoutineTableEntry(routine_name, parameters, return_type)
@@ -86,6 +93,11 @@ class SymbolTable:
             return True
 
     def is_defined_in_current_scope(self, variable_name):
+        """
+        :param variable_name:
+        :return: whether variable is defined in current scope (scopes of if, while and for are considered
+                 to be in the same scope of routine)
+        """
         return self.aux_is_defined_in_current_scope(variable_name, self.parent_scope is None)
 
     def aux_is_defined_in_current_scope(self, variable_name, is_root_scope):
@@ -105,7 +117,7 @@ class SymbolTable:
             raise Exception("While, for and if cannot be used in the global scope. Cannot create a general"
                             "inner scope for global scope, only one for a routine")
         self.routine_inner_scopes_counter += 1
-        return "inner_scope{}".format(self.routine_inner_scopes_counter)
+        return "{}{}".format(SymbolTable.inner_scope_name, self.routine_inner_scopes_counter)
 
     def is_root_table(self):
         """
@@ -117,11 +129,16 @@ class SymbolTable:
         self.routine_inner_scopes_counter = 0
 
     @staticmethod
-    def reset_counters(current_table=root_table):
+    def reset_counters(current_table=None):
+        """
+        Resets all counters in all tables in the hierarchy.
+        :param current_table:
+        """
+        if current_table is None:
+            current_table = SymbolTable.root_table
         current_table.reset_counter()
         for child_table in current_table.child_scopes.values():
             SymbolTable.reset_counters(child_table)
-        pass
 
 
 class SymbolTableEntry:

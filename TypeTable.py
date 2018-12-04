@@ -112,6 +112,10 @@ class AliasType:
 
     table = {}
 
+    # @staticmethod
+    # def get_type_of_alias(alias_name):
+    #     if alias_name in
+
     def __init__(self):
         pass
 
