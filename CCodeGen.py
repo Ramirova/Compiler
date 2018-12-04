@@ -1,4 +1,4 @@
-from HelloVisitor import HelloVisitor
+from lexical_and_syntax_analysis.HelloVisitor import HelloVisitor
 from SymbolTable import *
 from TypeTable import *
 import unicodedata

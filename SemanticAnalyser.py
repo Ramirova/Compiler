@@ -1,6 +1,6 @@
-from HelloVisitor import HelloVisitor
+from lexical_and_syntax_analysis.HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
-from HelloParser import HelloParser
+from lexical_and_syntax_analysis.HelloParser import HelloParser
 from TypeTable import *
 import unicodedata
 
@@ -12,7 +12,7 @@ internal structures (variables, routines, loops and if-statements), and a 'Type 
 """
 
 
-class SymbolTableGenerator(HelloVisitor):
+class SemanticAnalyser(HelloVisitor):
     """Global variables"""
     current_symbol_table = SymbolTable(parent=None)
     type_table = TypeTable
