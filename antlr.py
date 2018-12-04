@@ -4,6 +4,7 @@ from CCodeGen import CCodeGen
 from HelloLexer import HelloLexer
 from HelloListener import HelloListener
 from HelloParser import HelloParser
+from C_makefile import C_makefile
 
 from SymbolTableGenerator import SymbolTableGenerator
 
@@ -21,11 +22,13 @@ def main():
     # printer = HelloPrintListener()
     printer = SymbolTableGenerator()
     printer = printer.visit(tree)
-    visitor = CCodeGen([])
+    visitor = CCodeGen()
     visitor.visit(tree)
-    # walker = ParseTreeWalker()
-    # walker.walk(printer, tree)
-
+    print(visitor.type_def_queue)
+    print(visitor.queue)
+    print(visitor.routines)
+    makefile = C_makefile(visitor.type_def_queue, visitor.queue, visitor.routines)
+    makefile.make_file()
 
 if __name__ == '__main__':
     main()

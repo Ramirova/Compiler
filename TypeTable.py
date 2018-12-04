@@ -14,17 +14,41 @@ class TypeTable:
     def __init__(self):
         pass
 
-    table = {}
+    table = {}  # Table with types
 
     @staticmethod
     def add_type(type_id, type_content):
         TypeTable.table[type_id] = type_content
 
     @staticmethod
-    def get_type(type_id):
+    def get_type_name(type_id):
+        """
+        :param type_id:
+        :return: a string representation of the type
+        """
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
-        return TypeTable.table[type_id].__class__.__name__
+        type_name = TypeTable.table[type_id].__class__.__name__
+        if type_name == 'PrimitiveType':
+            return '{}'.format(PrimitiveType.type_names[type_id])
+        if type_name == 'ArrayType':
+            return '<{} of {}>'.format(type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
+        if type_name == 'RecordType':
+            result_string = '<' + type_name + ' with inner variables: \n{'
+            for key, value in TypeTable.table[type_id].inner_declarations.items():
+                result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(value))
+            return result_string + '}>'
+
+
+    @staticmethod
+    def get_type(type_id):
+        """
+        :param type_id:
+        :return: object of type
+        """
+        if type_id not in TypeTable.table.keys():
+            raise Exception("cannot find type with id {}".format(type_id))
+        return TypeTable.table[type_id]
 
 
 class PrimitiveType:
@@ -38,6 +62,7 @@ class PrimitiveType:
     boolean = 3
 
     types = {'integer': 1, 'real': 2, 'boolean': 3}
+    type_names = {1: 'integer', 2: 'real', 3: 'boolean'}
 
     def __init__(self):
         pass
@@ -97,6 +122,19 @@ class TypeUtils:
         pass
 
     @staticmethod
+    def are_compatible_for_assignment(type_id_1, type_id_2):
+        if type_id_1 == type_id_2:
+            return True
+
+        if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.real:
+            return False
+
+        if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
+            return True
+
+        return False
+
+    @staticmethod
     def are_compatible(type_id_1, type_id_2):
         if type_id_1 == type_id_2:
             return True
@@ -128,7 +166,7 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.integer
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_division(type_id_1, type_id_2):
@@ -148,21 +186,21 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.boolean
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_module(type_id_1, type_id_2):
         if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
             return PrimitiveType.integer
         raise Exception('cannot take module for {} and {}. Module can only be applied to integer values'
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_comparable(type_id_1, type_id_2):
         if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
             return True
         raise Exception("Incompatible types {} and {} for comparison. This operator can only be applied to primitive"
-                        " types".format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        " types".format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
 
 

@@ -78,7 +78,7 @@ ifStatement
     ;
 
 routineDeclaration
-    : 'routine' Identifier (parameters)? (':' lang_type )? ('is' body 'end')?
+    : 'routine' Identifier (parameters)? (':' lang_type )? ('is' body ('return' expression )? 'end')?
     ;
 
 parameters
@@ -162,6 +162,7 @@ Keyword
     | 'then'
     | 'else'
     | 'not'
+    | 'return'
     ;
 
 fragment Letter

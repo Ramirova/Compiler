@@ -1,2 +1,5 @@
-var a : record var b : integer end;
+routine bubble_sort: integer is
+    var start_loop : integer is 1
+    return start_loop
+end;
 
