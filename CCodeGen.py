@@ -302,10 +302,13 @@ class CCodeGen(HelloVisitor):
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
         self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
 
+        print("q", ctx.children[2].getText())
+        routine_args = ""
+        # if ctx.children[2].getText() != ":":
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
         print("qww", routine_args)
-        if ":" in routine_args[0] and len(routine_args) >= 1:
+        if len(routine_args) >= 1 and ctx.children[2].getText() != ":":
             for arg in routine_args:
                 print("qww2")
                 name = arg.split(":")[0]

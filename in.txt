@@ -1,6 +1,6 @@
 var start_loop: integer;
 var a: real;
-routine bubble_sort: integer is
+routine bubble_sort(l: integer, p: boolean): integer is
     var start_loop : integer is 1
     var end_loop: integer is 3
     var arr: array[3] integer
