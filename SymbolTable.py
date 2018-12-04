@@ -38,9 +38,7 @@ class SymbolTable:
         if self.parent_scope is None and not self.routine_defined_in_scope(routine_name):
             raise Exception('there is no {} routine defined'.format(routine_name))
         if self.routine_defined_in_scope(routine_name):
-            return self.routines[routine_name]
-        else:
-            return self.parent_scope.get_routine_info(routine_name)
+            return SymbolTable.root_table.routines[routine_name]
 
     def add_variable(self, variable_name, variable_type):
         """
