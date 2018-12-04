@@ -5,23 +5,32 @@ from TypeTable import *
 import unicodedata
 
 """
+The class that performs semantic analysis of a program tree. Uses instances of a 'Symbol table' to define scopes of 
+internal structures (variables, routines, loops and if-statements), and a 'Type table' to keep track of types
+- primitive as well as user-defined. 
 
 """
 
 
 class SymbolTableGenerator(HelloVisitor):
+    """Global variables"""
     current_symbol_table = SymbolTable(parent=None)
     type_table = TypeTable
     type_table.table[1] = PrimitiveType()
     type_table.table[2] = PrimitiveType()
     type_table.table[3] = PrimitiveType()
 
-    def unicode_to_str(self, unicode_str):
+    @staticmethod
+    def unicode_to_str(unicode_str):
+        """
+        Function to convert unicode string to ascii string
+        :param unicode_str: sring in format u'__any_string__'
+        :return: ascii string
+        """
         return unicodedata.normalize('NFKD', unicode_str).encode('ascii', 'ignore')
 
     def visitProgram(self, ctx):
-        a = self.visitChildren(ctx)
-        return a
+        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#simpleDeclaration.
     def visitSimpleDeclaration(self, ctx):
@@ -29,38 +38,50 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#variableDeclaration.
     def visitVariableDeclaration(self, ctx):
+        #  array with all children of a current context
         children = ctx.children
-        identifier = ctx.Identifier().getText()
-        identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+
+        #  get the context of children
+        identifier = self.unicode_to_str(ctx.Identifier().getText())
         lang_type = self.visitChildren(ctx)
+        expression = ctx.expression()
+
+        #  if type is specified deduce type
         if len(children) > 4:
             lang_type = self.visitLang_type(children[3])
         final_type = lang_type
-        expression = ctx.expression()
+
+        #  check if the variable was already defined in the current scope
         if self.current_symbol_table.is_defined_in_current_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
-        if lang_type is None:  # 'var' Identifier'is'expression
+
+        #  deduce type from expression if no explicit type was specified
+        if lang_type is None:  # 'var' Identifier 'is' expression
             final_type = self.visitExpression(expression)
+        #  check if explicit type definition corresponds to the expression type
         elif lang_type is not None and expression is not None:  # 'var' Identifier ':' lang_type 'is' expression
             expression_type = self.visitExpression(expression)
             if lang_type != expression_type:
                 raise Exception('Incompatible types in variable declaration {} '.format(identifier))
+
+        #  add variable to the symbol table
         self.current_symbol_table.add(identifier, final_type)
-        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
-        id = ctx.Identifier().getText()
-        id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+        #  get the context of children
+        identifier = self.unicode_to_str(ctx.Identifier().getText())
         current_type = self.visitLang_type(ctx)
 
-        AliasType.table[id] = current_type
-
-        return self.visitChildren(ctx)
+        #  add alias for the type to the Type table
+        AliasType.table[identifier] = current_type
 
     # Visit a parse tree produced by HelloParser#lang_type.
     def visitLang_type(self, ctx):
+        #  array with all children of a current context
         children = ctx.children
+
+        #
         if len(children) > 3 and hasattr(ctx.children[3], 'Identifier') and ctx.children[3].Identifier() is not None:
             id = ctx.children[3].Identifier().getText()
             id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
@@ -139,21 +160,21 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
-        self.current_symbol_table = self.current_symbol_table.create_child_scope('while')
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(
+            self.current_symbol_table.get_new_inner_scope_name())
         recur = self.visitChildren(ctx)
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        self.current_symbol_table.remove_child_scope('while')
         return recur
 
     # Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
-        self.current_symbol_table = self.current_symbol_table.create_child_scope('for')
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(
+            self.current_symbol_table.get_new_inner_scope_name())
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         self.current_symbol_table.add(identifier, PrimitiveType.integer)
         recur = self.visitChildren(ctx)
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        self.current_symbol_table.remove_child_scope('for')
         return recur
 
     # Visit a parse tree produced by HelloParser#lang_range.
@@ -170,21 +191,22 @@ class SymbolTableGenerator(HelloVisitor):
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
         children = ctx.children
-        self.current_symbol_table = self.current_symbol_table.create_child_scope('if')
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(
+            self.current_symbol_table.get_new_inner_scope_name())
         if self.visitExpression(children[1]) != PrimitiveType.boolean:
             raise Exception("Condition of if statement is not boolean")
         recur = self.visitBody(children[3])
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        self.current_symbol_table.remove_child_scope('if')
         if len(children) > 5:
-            self.current_symbol_table = self.current_symbol_table.create_child_scope('else')
+            self.current_symbol_table = self.current_symbol_table.create_child_scope(
+                self.current_symbol_table.get_new_inner_scope_name())
             recur = self.visitBody(children[5])
             self.current_symbol_table = self.current_symbol_table.parent_scope
-            self.current_symbol_table.remove_child_scope('else')
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
         if ctx.parameters() is not None:
             parameters_context = ctx.parameters().children
             declarations = []
@@ -197,7 +219,7 @@ class SymbolTableGenerator(HelloVisitor):
                 parameters[id] = t
         else:
             parameters = None
-        self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
+
         body = ctx.body()
         if body is not None:
             self.visitBody(body)
@@ -218,7 +240,7 @@ class SymbolTableGenerator(HelloVisitor):
             raise Exception('Routine {} is already defined'.format(identifier))
         self.current_symbol_table = self.current_symbol_table.parent_scope
         self.current_symbol_table.add_routine(identifier, parameters, return_type)
-
+        a = 5
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
         return self.visitChildren(ctx)
