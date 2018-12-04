@@ -10,7 +10,6 @@ to get the types and make equivalent code in C.
 
 
 class CCodeGen(HelloVisitor):
-
     """
     Maps to get equivalent C type of the variable from type in I language
     """
@@ -42,6 +41,7 @@ class CCodeGen(HelloVisitor):
         self.routines = [] # List with the names of all routines declared
         self.record_values = "" # Variable stores the values in record that we currently translate
         self.scope_number = 0 #sequential number of subcscope in routine
+        SymbolTable.reset_counters()
 
     def visitProgram(self, ctx):
         """
@@ -283,8 +283,9 @@ class CCodeGen(HelloVisitor):
         :return: the result of the visit all its children
         """
         self.current_queue.append("if (" + self.expressionToString(self.visitExpression(ctx.children[1])) + ") {\n")
-        # self.current_scope = self.current_scope.scope["inner_scope_" + str(self.scope_number)]
+        # self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.visitBody(ctx.children[3])
+        # self.current_scope = self.current_scope.parent_scope
         self.current_queue.append("}\n")
         return
 
@@ -296,10 +297,11 @@ class CCodeGen(HelloVisitor):
         """
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
         self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
-        routine_declaration = "void " + ctx.children[1].getText()
+
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        if ":" in routine_args > 0:
+        print(len(routine_args))
+        if ":" in routine_args and len(routine_args) > 1:
             for arg in routine_args:
                 name = arg.split(":")[0]
                 type = arg.split(":")[1]
@@ -309,13 +311,20 @@ class CCodeGen(HelloVisitor):
                     args += self.primitive_type_map[type_id] + " " + name + ", "
                 else:
                     args += self.c_type_map[arg_type] + " " + name + ", "
+        return_type = "void"
+
+        if ":" in routine_args and len(routine_args) == 1:
+            return_type = self.c_type_map[ctx.children[3].getText()]
         if args is not "":
             args = args[:-2]
-        routine_declaration += "(" + args + ") {\n"
+        routine_declaration = return_type + " " + ctx.children[1].getText() + "(" + args + ")" + " {\n"
         self.current_queue.append(routine_declaration.encode('ascii', 'ignore'))
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
-        self.current_queue.append("}\n")
+
+        if len(ctx.children) >= 6 and ctx.children[6].getText() == "return":
+            self.current_queue.append(("return " + ctx.children[7].getText()).encode('ascii', 'ignore'))
+        self.current_queue.append(";\n}\n")
         print(self.current_queue)
         return visit_children
 
