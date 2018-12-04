@@ -351,41 +351,59 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
-        #
+        #  getting context children
         children = ctx.children
+
+        #  if one child get and return type
         if len(children) <= 1:
-            expression_type = self.visitChildren(ctx)
+            expression_type = self.visitRelation(children[0])
             print expression_type
             return expression_type
-        left_type = self.visitChildren(children[0])
-        right_type = self.visitChildren(children[2])
+
+        #  if both relations are present get their types
+        left_type = self.visitRelation(children[0])
+        right_type = self.visitRelation(children[2])
+
+        #  check if both are boolean
         if left_type != PrimitiveType.boolean or right_type != PrimitiveType.boolean:
             raise Exception('Incompatible types {} and {} in expression, can be applied to boolean only'.format(
                 TypeTable.get_type_name(left_type), TypeTable.get_type_name(right_type)))
-        self.visitChildren(ctx)
+
+        #  return expression type
         expression_type = PrimitiveType.boolean
         print expression_type
         return expression_type
 
     # Visit a parse tree produced by HelloParser#relation.
     def visitRelation(self, ctx):
+        #  getting context children
         children = ctx.children
-        relation_type = self.visitFactor(children[0])
+
+        #  if one child get and return type
         if len(children) <= 1:
-            return self.visitChildren(ctx)
+            return self.visitSimple(children[0])
+
+        #  if both relations are present check their type compatibility
         left = children[0]
-        right = children[2]
-        TypeUtils.deduce_type_comparable(self.visitFactor(left), self.visitFactor(right))
-        self.visitChildren(ctx)
+        left_type = self.visitSimple(children[0])
+        right_type = self.visitSimple(children[2])
+        TypeUtils.deduce_type_comparable(left_type, right_type)
         return PrimitiveType.boolean
 
     # Visit a parse tree produced by HelloParser#simple.
     def visitSimple(self, ctx):
+        #  getting context children
         children = ctx.children
         simple_type = self.visitFactor(children[0])
+
+        #  if one child get and return type
         if len(children) <= 1:
-            return self.visitChildren(ctx)
+            return self.visitFactor(ctx)
+
+        #  get operator
         operator = children[1]
+
+        #  if both relations are present check their type compatibility according to the operator
         if operator is not None:
             left = children[0]
             right = children[2]
@@ -396,7 +414,6 @@ class SymbolTableGenerator(HelloVisitor):
                 simple_type = TypeUtils.deduce_type_division(self.visitFactor(left), self.visitFactor(right))
             elif operator_text == '%':
                 simple_type = TypeUtils.deduce_type_module(self.visitFactor(left), self.visitFactor(right))
-        self.visitChildren(ctx)
         return simple_type
 
     # Visit a parse tree produced by HelloParser#factor.
