@@ -65,7 +65,7 @@ class SymbolTableGenerator(HelloVisitor):
                 raise Exception('Incompatible types in variable declaration {} '.format(identifier))
 
         #  add variable to the symbol table
-        self.current_symbol_table.add_varbiale(identifier, final_type)
+        self.current_symbol_table.add_variable(identifier, final_type)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
     def visitTypeDeclaration(self, ctx):
@@ -81,21 +81,22 @@ class SymbolTableGenerator(HelloVisitor):
         #  array with all children of a current context
         children = ctx.children
 
-        #
+        #  if type declaration is an alias to an existing alias
         if len(children) > 3 and hasattr(ctx.children[3], 'Identifier') and ctx.children[3].Identifier() is not None:
-            id = ctx.children[3].Identifier().getText()
-            id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
-            return AliasType.table[id]
+            identifier = self.unicode_to_str(ctx.children[3].Identifier().getText())
+            return AliasType.table[identifier]
+
+        #  integrating the Universe
         if len(children) == 1 and self.unicode_to_str(children[0].getText()) in AliasType.table.keys():
             return AliasType.table[children[0].getText()]
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#primitiveType.
     def visitPrimitiveType(self, ctx):
-        c = ctx.children[0].getText()
-        c = unicodedata.normalize('NFKD', c).encode('ascii', 'ignore')
-        id = PrimitiveType.types[c]
-        return id
+        #  getting a code of a type from the Type table
+        p_text = self.unicode_to_str(ctx.children[0].getText())
+        identifier = PrimitiveType.types[p_text]
+        return identifier
 
     # Visit a parse tree produced by HelloParser#userType.
     def visitUserType(self, ctx):
@@ -103,23 +104,38 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#recordType.
     def visitRecordType(self, ctx):
+        #  creating a new scope for the record in order to define new types
         self.current_symbol_table = self.current_symbol_table.create_child_scope('current_record')
+
+        #  array with all children of a current context
         children = ctx.children
+
+        #  creating a dictionary with variables defined in the record
         record_variables = {}
         for c in children:
             if type(c) == HelloParser.VariableDeclarationContext:
-                var_name = unicodedata.normalize('NFKD', c.children[1].getText()).encode('ascii', 'ignore')
+                var_name = self.unicode_to_str(c.children[1].getText())
                 var_type = self.visitLang_type(c)
                 record_variables[var_name] = var_type
+
+        #  define this record as a new type
         new_type = RecordType(record_variables)
         self.current_symbol_table = self.current_symbol_table.parent_scope
+
+        #  remove the scope because records don't have a scope,
+        #  we just needed it to add tew variables and define a new type
         self.current_symbol_table.remove_child_scope('current_record')
         return new_type.get_id()
 
     # Visit a parse tree produced by HelloParser#arrayType.
     def visitArrayType(self, ctx):
+        #  get the type of array elements
         nested_type = self.visitChildren(ctx)
+
+        #  create a new type of array
         new_type = ArrayType(nested_type)
+
+        #  check type in case the size of the array is defined with expression
         expression = ctx.children[2]
         if self.visitExpression(expression) != PrimitiveType.integer:
             raise Exception('Array size can only be integer')
@@ -131,30 +147,37 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#assignment.
     def visitAssignment(self, ctx):
+        #  getting assignment contexts and their types
         lhs = ctx.modifiablePrimary()
         rhs = ctx.expression()
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
+
+        #  checking assignment types compatibility
         if TypeTable.get_type_name(lhs_type) == 'ArrayType':
+            #  if trying to assign incompatible type to an array element
             if TypeTable.table[lhs_type].nested_type_id != rhs_type:
                 raise Exception('Cannot assign {} to array with elements of type {}'.format(rhs_type, lhs_type))
             else:
                 return self.visitChildren(ctx)
+        #  check for assignment of real to boolean
         elif lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
             raise Exception('Cannot assign type real to boolean variable')
         elif not TypeUtils.are_compatible(lhs_type, rhs_type):
             raise Exception(
                 'Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
                                                                            TypeTable.get_type_name(rhs_type)))
-        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
-        routine_name = ctx.Identifier().getText()
-        routine_name = unicodedata.normalize('NFKD', routine_name).encode('ascii', 'ignore')
+        #  getting routine name and return type
+        routine_name = self.unicode_to_str(ctx.Identifier().getText())
+        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+
+        #  check if routine was defined
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
             raise Exception('Routine {} is not defined'.format(routine_name))
-        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+
         self.visitChildren(ctx)
         return return_type
 
@@ -220,27 +243,28 @@ class SymbolTableGenerator(HelloVisitor):
         else:
             parameters = None
 
-        body = ctx.body()
-        if body is not None:
-            self.visitBody(body)
-
         if ctx.lang_type() is not None:
             return_type = self.visitLang_type(ctx.lang_type())
             if ctx.expression() is None:
                 raise Exception("Routine must have a return statement")
-            else:
-                expr_type = self.visitExpression(ctx.expression())
-                if return_type != expr_type:
-                    raise Exception("Return type must be {}".format(TypeTable.get_type_name(return_type)))
         else:
             return_type = None
             if ctx.expression() is not None:
                 raise Exception("Routine has no return type")
         if self.current_symbol_table.routine_defined_in_scope(identifier):
             raise Exception('Routine {} is already defined'.format(identifier))
+        self.current_symbol_table.parent_scope.add_routine(identifier, parameters, return_type)
+        body = ctx.body()
+        if body is not None:
+            self.visitBody(body)
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        self.current_symbol_table.add_routine(identifier, parameters, return_type)
+        if ctx.expression() is not None:
+            expr_type = self.visitExpression(ctx.expression())
+            if return_type != expr_type:
+                raise Exception("Return type must be {}".format(TypeTable.get_type_name(return_type)))
+
         a = 5
+
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
         return self.visitChildren(ctx)
