@@ -303,6 +303,7 @@ class SymbolTableGenerator(HelloVisitor):
         if body is not None:
             self.visitBody(body)
         self.current_symbol_table = self.current_symbol_table.parent_scope
+        SymbolTable.reset_counters()
         if ctx.expression() is not None:
             expr_type = self.visitExpression(ctx.expression())
             if return_type != expr_type:

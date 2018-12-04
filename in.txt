@@ -3,10 +3,11 @@ var a: real;
 routine bubble_sort(b : array[3] integer): integer is
     var start_loop : integer is 1
     var end_loop: integer is 3
+    var arr: array[3] integer
     for i in start_loop..end_loop loop
-        var a: integer
+        var a: record var a: integer var lol: boolean end
         for j in start_loop..end_loop loop
-            var d: integer
+            bubble_sort(arr)
         end
         if 5>6 then
             var c: integer
