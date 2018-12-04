@@ -17,7 +17,6 @@ class CCodeGen(HelloVisitor):
         3: "bool"
     }
 
-
     def __init__(self, args):
         self.current_scope = SymbolTable.root_table
         self.type_table = TypeTable.table
@@ -28,6 +27,8 @@ class CCodeGen(HelloVisitor):
         self.record_state = False
         self.current_record = ""
         self.number_of_loops = 0
+        self.routines = []
+        self.record_values = ""
 
     def visitProgram(self, ctx):
         return self.visitChildren(ctx)
@@ -40,12 +41,9 @@ class CCodeGen(HelloVisitor):
     def visitVariableDeclaration(self, ctx):
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        SymbolTable.root_table
         if self.record_state:
             record_scope_id = self.current_scope.scope[self.current_record].variable_type
             type_id = self.type_table[record_scope_id].inner_declarations[identifier]
-            print(type_id)
-            # type_id = self.type_table[]
         else:
             type_id = self.current_scope.scope[identifier].variable_type
         if ctx.children[3].getText() not in AliasType.table:
@@ -58,33 +56,36 @@ class CCodeGen(HelloVisitor):
                 self.current_queue = self.type_def_queue
                 self.current_record = identifier
                 self.current_record = identifier
-                self.current_queue.append(("typedef struct " + identifier + "_type {\n").encode('ascii', 'ignore'))
+                self.current_queue.append(("typedef struct {\n").encode('ascii', 'ignore'))
                 self.visitChildren(ctx.children[3])
                 self.record_state = False
                 self.current_record = ""
-                self.current_queue.append(("};").encode('ascii', 'ignore'))
+                self.current_queue.append(("} " + identifier + "_type" + ";").encode('ascii', 'ignore'))
                 self.current_queue = self.queue
-                self.current_queue.append(identifier + "_type " + identifier + ";")
+                self.current_queue.append(identifier + "_type " + identifier + "")
+                if self.record_values != "":
+                    print("qq1", self.record_values)
+                    self.current_queue.append((" = {" + self.record_values[:-2] + "}").encode('ascii', 'ignore'))
+                self.current_queue.append(";\n")
                 print(self.type_def_queue)
                 print(self.queue)
                 return
                 # identifier_type = id
         else:
             identifier_type = ctx.children[3].getText()
-
-        # print(identifier)
-        # print("ctx size: ", len(ctx.children))
-        # print(ctx.children[2])
-
         post_declaration = ""
         if ctx.children[2].getText() == "is":
             post_declaration = " = " + ctx.children[3].getText()
 
         if len(ctx.children) > 4:
             post_declaration = " = " + ctx.children[5].getText()
-
-        declaration = identifier_type + " " + identifier + post_declaration
-        self.current_queue.append((declaration + ";").encode('ascii', 'ignore'))
+        if self.record_state:
+            declaration = identifier_type + " " + identifier + "\n"
+            if post_declaration != "":
+                self.record_values += ctx.children[5].getText() + ", "
+        else:
+            declaration = identifier_type + " " + identifier + post_declaration
+        self.current_queue.append((declaration + ";\n").encode('ascii', 'ignore'))
         print(self.current_queue)
         return
 
@@ -162,7 +163,8 @@ class CCodeGen(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#assignment.
     def visitAssignment(self, ctx):
-        self.current_queue.append((ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
+        self.current_queue.append(
+            (ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
@@ -185,8 +187,9 @@ class CCodeGen(HelloVisitor):
                                    " = " + ctx.children[3].getText().split("..")[0]).encode('ascii', 'ignore'))
         iterator = ctx.children[1].getText()
         loop_range = ctx.children[3].getText().split("..")
-        self.current_queue.append(("for (int " + iterator + " = " + loop_range[0] + "; "
-                                   + iterator + " < " + loop_range[1] + "; " + iterator + "++) {\n").encode('ascii', 'ignore'))
+        self.current_queue.append(("\nfor (int " + iterator + " = " + loop_range[0] + "; "
+                                   + iterator + " < " + loop_range[1] + "; " + iterator + "++) {\n").encode('ascii',
+                                                                                                            'ignore'))
         print(ctx.getText())
         self.visitChildren(ctx)
         self.current_queue.append("}\n")
@@ -206,6 +209,7 @@ class CCodeGen(HelloVisitor):
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
+        self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
         routine_declaration = "void " + ctx.children[1].getText()
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
@@ -247,7 +251,8 @@ class CCodeGen(HelloVisitor):
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
 
-        return ctx.getText().replace("and", "&&").replace("xor", "^").replace("/=", "!=").replace("or", "||").replace("=", "==").encode('ascii', 'ignore')
+        return ctx.getText().replace("and", "&&").replace("xor", "^").replace("/=", "!=").replace("or", "||").replace(
+            "=", "==").encode('ascii', 'ignore')
         # return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#relation.

@@ -11,7 +11,7 @@ routine bubble_sort(b : array[3] integer) is
     for j in start_loop..end_loop loop
         for i in start_second_loop..(end_second_loop-j) loop
             if b[i] > b[i + 1] then
-                var temp is a[i]
+                temp := b[i]
                 b[i] := b[i + 1]
                 b[i + 1] := temp
                 flag := 2
