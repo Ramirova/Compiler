@@ -304,8 +304,10 @@ class CCodeGen(HelloVisitor):
 
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        if ":" in routine_args and len(routine_args) > 1:
+        print("qww", routine_args)
+        if ":" in routine_args[0] and len(routine_args) >= 1:
             for arg in routine_args:
+                print("qww2")
                 name = arg.split(":")[0]
                 type = arg.split(":")[1]
                 type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
