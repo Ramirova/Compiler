@@ -1,16 +1,11 @@
 #include <stdio.h>
 
 void init_and_start() {
-int e1 = 0;
-int start_loop = 1;
-int end_loop = 5;
-int i = start_loop
-for (int i = start_loop; i < end_loop; i++) {
-if (start_loop==1) {
-end_loop = 4;}
+int e1 = 1;
+return e1;
 }
-;
-}
+int[3] my_array;
+int res = init_and_start(my_array);
 
 int main (int argc, char *argv[]) {
 if argc > 0 {

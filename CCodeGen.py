@@ -326,8 +326,13 @@ class CCodeGen(HelloVisitor):
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
 
-        if len(ctx.children) >= 7 and ctx.children[6].getText() == "return":
-            self.current_queue.append(("return " + ctx.children[7].getText()).encode('ascii', 'ignore'))
+        print("qqqq", ctx.children[7].getText())
+        return_index = -1
+        for child in range(len(ctx.children)):
+            if ctx.children[child].getText() == "return":
+                return_index = child
+        if len(ctx.children) >= 7 and return_index != -1:
+            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore'))
         self.current_queue.append(";\n}\n")
         print(self.current_queue)
         return visit_children
