@@ -45,7 +45,7 @@ class SymbolTableGenerator(HelloVisitor):
             expression_type = self.visitExpression(expression)
             if lang_type != expression_type:
                 raise Exception('Incompatible types in variable declaration {} '.format(identifier))
-        self.current_symbol_table.add(identifier, final_type)
+        self.current_symbol_table.add_variable(identifier, final_type)
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#typeDeclaration.
@@ -150,7 +150,7 @@ class SymbolTableGenerator(HelloVisitor):
         self.current_symbol_table = self.current_symbol_table.create_child_scope('for')
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
-        self.current_symbol_table.add(identifier, PrimitiveType.integer)
+        self.current_symbol_table.add_variable(identifier, PrimitiveType.integer)
         recur = self.visitChildren(ctx)
         self.current_symbol_table = self.current_symbol_table.parent_scope
         self.current_symbol_table.remove_child_scope('for')
@@ -230,7 +230,7 @@ class SymbolTableGenerator(HelloVisitor):
         lang_type = self.visitLang_type(ctx)
         if self.current_symbol_table.is_defined_in_current_scope(id):
             raise Exception('Parameter with name {} is already defined'.format(id))
-        self.current_symbol_table.add(id, lang_type)
+        self.current_symbol_table.add_variable(id, lang_type)
         self.visitChildren(ctx)
         return id, lang_type
 
