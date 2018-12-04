@@ -209,7 +209,9 @@ class SymbolTableGenerator(HelloVisitor):
             raise Exception('Routine {} is already defined'.format(identifier))
         self.current_symbol_table.add_routine(identifier, parameters, return_type)
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
-
+        body = ctx.body()
+        if body is not None:
+            self.visitBody(body)
         self.current_symbol_table = self.current_symbol_table.parent_scope
 
     # Visit a parse tree produced by HelloParser#parameters.
