@@ -273,43 +273,59 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
-        identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
+        # getting context children
+        identifier = self.unicode_to_str(ctx.Identifier().getText())
+        routine_parameters = ctx.parameters()
+        routine_return_type = ctx.lang_type()
+        return_expression = ctx.expression()
+        body = ctx.body()
+
+        #  check if routine with this name already exists
+        if self.current_symbol_table.routine_defined_in_scope(identifier):
+            raise Exception('Routine {} is already defined'.format(identifier))
+
+        #  create a new scope for routine
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
-        if ctx.parameters() is not None:
-            parameters_context = ctx.parameters().children
+
+        #  check routine parameters declaration and construct a list woth those parameters
+        if routine_parameters is not None:
+            parameters_children = ctx.parameters().children
             declarations = []
-            for i in range(len(parameters_context)):
+            for i in range(len(parameters_children)):
                 if i % 2 == 1:
-                    declarations.append(parameters_context[i])
-            parameters = []
+                    declarations.append(parameters_children[i])
+            parameters_list = []
             for d in declarations:
                 _, t = self.visitParameterDeclaration(d)
-                parameters.append(t)
+                parameters_list.append(t)
         else:
-            parameters = None
+            parameters_list = None
 
-        if ctx.lang_type() is not None:
-            return_type = self.visitLang_type(ctx.lang_type())
-            if ctx.expression() is None:
+        #  check return type ans return statement consistency
+        if routine_return_type is not None:
+            return_type = self.visitLang_type(routine_return_type)
+            if return_expression is None:
                 raise Exception("Routine must have a return statement")
         else:
             return_type = None
-            if ctx.expression() is not None:
+            if return_expression is not None:
                 raise Exception("Routine has no return type")
-        if self.current_symbol_table.routine_defined_in_scope(identifier):
-            raise Exception('Routine {} is already defined'.format(identifier))
-        self.current_symbol_table.parent_scope.add_routine(identifier, parameters, return_type)
-        body = ctx.body()
+
+        #  add routine to the scope
+        self.current_symbol_table.parent_scope.add_routine(identifier, parameters_list, return_type)
+
+        #  visit body
         if body is not None:
             self.visitBody(body)
-        self.current_symbol_table = self.current_symbol_table.parent_scope
-        SymbolTable.reset_counters()
-        if ctx.expression() is not None:
-            expr_type = self.visitExpression(ctx.expression())
+
+        #  check expression in return statement to be of routines return type
+        if return_expression is not None:
+            expr_type = self.visitExpression(return_expression)
             if return_type != expr_type:
                 raise Exception("Return type must be {}".format(TypeTable.get_type_name(return_type)))
 
-        a = 5
+        #  returning to higher scope
+        self.current_symbol_table = self.current_symbol_table.parent_scope
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
@@ -317,14 +333,17 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#parameterDeclaration.
     def visitParameterDeclaration(self, ctx):
-        id = ctx.children[0].getText()
-        id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
+        #  getting context children
+        identifier = self.unicode_to_str(ctx.children[0].getText())
         lang_type = self.visitLang_type(ctx)
-        if self.current_symbol_table.is_defined_in_current_scope(id):
-            raise Exception('Parameter with name {} is already defined'.format(id))
-        self.current_symbol_table.add_variable(id, lang_type)
-        self.visitChildren(ctx)
-        return id, lang_type
+
+        #  chech is parameter with this name is already defined
+        if self.current_symbol_table.is_defined_in_current_scope(identifier):
+            raise Exception('Parameter with name {} is already defined'.format(identifier))
+
+        #  add variable to current scope
+        self.current_symbol_table.add_variable(identifier, lang_type)
+        return identifier, lang_type
 
     # Visit a parse tree produced by HelloParser#body.
     def visitBody(self, ctx):
@@ -332,6 +351,7 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#expression.
     def visitExpression(self, ctx):
+        #
         children = ctx.children
         if len(children) <= 1:
             expression_type = self.visitChildren(ctx)
