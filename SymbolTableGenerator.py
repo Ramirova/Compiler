@@ -357,7 +357,6 @@ class SymbolTableGenerator(HelloVisitor):
         #  if one child get and return type
         if len(children) <= 1:
             expression_type = self.visitRelation(children[0])
-            print expression_type
             return expression_type
 
         #  if both relations are present get their types
@@ -371,7 +370,6 @@ class SymbolTableGenerator(HelloVisitor):
 
         #  return expression type
         expression_type = PrimitiveType.boolean
-        print expression_type
         return expression_type
 
     # Visit a parse tree produced by HelloParser#relation.
@@ -434,7 +432,7 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#summand.
     def visitSummand(self, ctx):
-        #   getting context children
+        #  getting context children
         children = ctx.children
         summand_type = self.visitChildren(ctx)
 
@@ -446,24 +444,22 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#primary.
     def visitPrimary(self, ctx):
-        primitives = [1, 2, 3]
-        child_type = self.visitChildren(ctx)
+        #  getting context children
         children = ctx.children
-        type_id = None
-
+        child_type = self.visitChildren(ctx)
         int_lit = ctx.IntegerLiteral()
         real_lit = ctx.RealLiteral()
         routine_call = ctx.routineCall()
 
+        #  deduce primary type
         if routine_call is not None:  # if primary is routine call
             type_id = self.visitRoutineCall(routine_call)
         elif int_lit is not None:  # if primary is integer
             type_id = PrimitiveType.integer
         elif real_lit is not None:  # if primary is real
             type_id = PrimitiveType.real
-        elif unicodedata.normalize('NFKD', children[0].getText()).encode('ascii',
-                                                                         'ignore') == 'true' or unicodedata.normalize(
-            'NFKD', children[0].getText()).encode('ascii', 'ignore') == 'false':  # if primary is boolean
+        elif self.unicode_to_str(children[0].getText()) == 'true' or self.unicode_to_str(
+                children[0].getText()) == 'false':  # if primary is boolean
             type_id = PrimitiveType.boolean
         else:  # if primary is modifiable primary
             type_id = child_type
@@ -471,44 +467,46 @@ class SymbolTableGenerator(HelloVisitor):
 
     # Visit a parse tree produced by HelloParser#modifiablePrimary.
     def visitModifiablePrimary(self, ctx):
-        self.visitChildren(ctx)
+        # self.visitChildren(ctx)
+        #  getting context children
         children = ctx.children
+        record_calls = []
 
-        identifier = None
-        array_identifier = None
-        function_calls = []
-
+        #  if modifiable primary is a variable name
         if len(children) == 1:
-            identifier = children[0].getText()
-            identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+            identifier = self.unicode_to_str(children[0].getText())
+            #  check if variable was declared
             if not self.current_symbol_table.is_defined_in_scope(identifier):
                 raise Exception('Variable {} is not defined'.format(identifier))
+            #  return type of the variable from the symbol table
             return self.current_symbol_table.get_variable_info(identifier).variable_type
+        #  if modifiable primary is a array identifier
         elif type(children[2]) is HelloParser.ExpressionContext:
-            array_identifier = children[0].getText()
-            array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
+            array_identifier = self.unicode_to_str(children[0].getText())
+            #  check if array was declared
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
+            #  return type of the array from the symbol table
             return TypeTable.get_type(
                 self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
+        #  if modifiable primary is a record field access
         else:
+            #  append identifiers of records and their fields to a list
             for i in range(len(children)):
                 if i % 2 == 0:
-                    id = children[i].getText()
-                    id = unicodedata.normalize('NFKD', id).encode('ascii', 'ignore')
-                    # TODO check validity of record fields
+                    identifier = self.unicode_to_str(children[i].getText())
                     # check that the first identifier is a declared variable with type record
-                    if i == 0 and not self.current_symbol_table.is_defined_in_scope(id):
-                        raise Exception('Record with name {} is not defined'.format(id))
-                    function_calls.append(id)
-
-            type_id = self.current_symbol_table.get_variable_info(function_calls[0]).variable_type
+                    if i == 0 and not self.current_symbol_table.is_defined_in_scope(identifier):
+                        raise Exception('Record with name {} is not defined'.format(identifier))
+                    record_calls.append(identifier)
+            #  check validity of field calls
+            type_id = self.current_symbol_table.get_variable_info(record_calls[0]).variable_type
             current_type = self.type_table.table[type_id]
-            for i in range(len(function_calls) - 1):
-                if function_calls[i + 1] not in current_type.inner_declarations.keys():
+            for i in range(len(record_calls) - 1):
+                if record_calls[i + 1] not in current_type.inner_declarations.keys():
                     raise Exception(
-                        "Record {} doesn't have a field {}".format(function_calls[i], function_calls[i + 1]))
-                type_id = current_type.inner_declarations[function_calls[i + 1]]
+                        "Record {} doesn't have a field {}".format(record_calls[i], record_calls[i + 1]))
+                type_id = current_type.inner_declarations[record_calls[i + 1]]
                 current_type = self.type_table.table[type_id]
             return type_id
 
