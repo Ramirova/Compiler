@@ -304,7 +304,6 @@ class CCodeGen(HelloVisitor):
 
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        print(len(routine_args))
         if ":" in routine_args and len(routine_args) > 1:
             for arg in routine_args:
                 name = arg.split(":")[0]
@@ -325,15 +324,13 @@ class CCodeGen(HelloVisitor):
         self.current_queue.append(routine_declaration.encode('ascii', 'ignore'))
         visit_children = self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
-
-        print("qqqq", ctx.children[7].getText())
         return_index = -1
         for child in range(len(ctx.children)):
             if ctx.children[child].getText() == "return":
                 return_index = child
         if len(ctx.children) >= 7 and return_index != -1:
-            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore'))
-        self.current_queue.append(";\n}\n")
+            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore') + ";")
+        self.current_queue.append("}\n")
         print(self.current_queue)
         return visit_children
 

@@ -22,7 +22,7 @@ class C_makefile:
         :return:
         """
         file = open("c_file.c", "w+")
-        file.write("#include <stdio.h>\n#include <stdbool.h>\n")
+        file.write("#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n")
 
         for typedef in self.typedef_queue:
             file.write(typedef)
@@ -42,16 +42,14 @@ class C_makefile:
         """
         main = ""
         main += "int main (int argc, char *argv[]) {\n"
-        main += "if argc > 0 {\n"
-        main += "switch(argv[1]) {\n"
+        main += "if (argc > 1) {\n"
 
         # main += "const char *routines[" + len(self.routines) + "] = { "
         for i in range(len(self.routines)):
-            main += "case \"" + self.routines[i] + "\":\n"
+            main += "if (strcmp(argv[1], \"" + self.routines[i] + "\") > 0) {\n"
             main += self.routines[i]
-            print(self.routines[i])
             if SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters is None:
-                main += '()\n'
+                main += '();\n'
             else:
                 main += "("
                 parameters = SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters
@@ -60,8 +58,8 @@ class C_makefile:
                     main += self.get_param_type(parameters[j]) + "argc[" + str(j + 2) + "], "
                 main = main[:-2]
                 main += ");\n"
-            main += "break;\n"
-        main += "default:\n break;\n}\n}"
+            main += "}\n"
+        main += "\n}\n}"
         return main
 
     def get_param_type(self, type_id):
