@@ -320,9 +320,11 @@ class CCodeGen(HelloVisitor):
                 else:
                     args += self.c_type_map[arg_type] + " " + name + ", "
         return_type = "void"
-
+        print("zz", ctx.children[4].getText())
         if ":" in routine_args and len(routine_args) == 1:
             return_type = self.c_type_map[ctx.children[3].getText()]
+        if  ":" in ctx.children[3].getText():
+            return_type = self.c_type_map[ctx.children[4].getText()]
         if args is not "":
             args = args[:-2]
         routine_declaration = return_type + " " + ctx.children[1].getText() + "(" + args + ")" + " {\n"

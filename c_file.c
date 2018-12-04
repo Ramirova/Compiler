@@ -4,7 +4,7 @@
 
 int start_loop;
 double a;
-void bubble_sort(int l, bool p) {
+int bubble_sort(int l, bool p) {
 int start_loop = 1;
 int end_loop = 3;
 int arr[3];
