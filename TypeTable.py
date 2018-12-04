@@ -14,7 +14,7 @@ class TypeTable:
     def __init__(self):
         pass
 
-    table = {}
+    table = {} # Table with types
 
     @staticmethod
     def add_type(type_id, type_content):
@@ -24,7 +24,17 @@ class TypeTable:
     def get_type_name(type_id):
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
-        return TypeTable.table[type_id].__class__.__name__
+        type_name = TypeTable.table[type_id].__class__.__name__
+        if type(TypeTable.table[type_id]) == PrimitiveType:
+            return type_name + PrimitiveType.types[type_id]
+        if type(TypeTable.table[type_id]) == ArrayType:
+            return type_name + TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
+        if type(TypeTable.table[type_id]) == RecordType:
+            result_string = type_name + ' {'
+            for key, value in TypeTable.table[type_id].inner_declarations.items():
+                result_string += '{}: {}'.format(key, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
+            return type_name + '}'
+
 
     @staticmethod
     def get_type(type_id):
