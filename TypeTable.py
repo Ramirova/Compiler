@@ -21,10 +21,16 @@ class TypeTable:
         TypeTable.table[type_id] = type_content
 
     @staticmethod
-    def get_type(type_id):
+    def get_type_name(type_id):
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
         return TypeTable.table[type_id].__class__.__name__
+
+    @staticmethod
+    def get_type(type_id):
+        if type_id not in TypeTable.table.keys():
+            raise Exception("cannot find type with id {}".format(type_id))
+        return TypeTable.table[type_id]
 
 
 class PrimitiveType:
@@ -128,7 +134,7 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.integer
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_division(type_id_1, type_id_2):
@@ -148,21 +154,21 @@ class TypeUtils:
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.boolean:
             return PrimitiveType.boolean
         raise Exception("Incompatible types {} and {}. This operator can only be applied to primitive types"
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_module(type_id_1, type_id_2):
         if type_id_1 == PrimitiveType.integer and type_id_2 == PrimitiveType.integer:
             return PrimitiveType.integer
         raise Exception('cannot take module for {} and {}. Module can only be applied to integer values'
-                        .format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        .format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
     @staticmethod
     def deduce_type_comparable(type_id_1, type_id_2):
         if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
             return True
         raise Exception("Incompatible types {} and {} for comparison. This operator can only be applied to primitive"
-                        " types".format(TypeTable.get_type(type_id_1), TypeTable.get_type(type_id_2)))
+                        " types".format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
 
 
 
