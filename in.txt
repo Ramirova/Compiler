@@ -1,16 +1,4 @@
-var start_loop: integer;
-var a: real;
-routine bubble_sort(b : array[3] integer): integer is
+routine bubble_sort: integer is
     var start_loop : integer is 1
-    var end_loop: integer is 3
-    for i in start_loop..end_loop loop
-        var a: integer
-        for j in start_loop..end_loop loop
-            var d: integer
-        end
-        if 5>6 then
-            var c: integer
-        end
-    end
     return start_loop
 end;
