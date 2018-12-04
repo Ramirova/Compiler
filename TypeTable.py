@@ -22,22 +22,30 @@ class TypeTable:
 
     @staticmethod
     def get_type_name(type_id):
+        """
+        :param type_id:
+        :return: a string representation of the type
+        """
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
         type_name = TypeTable.table[type_id].__class__.__name__
         if type_name == 'PrimitiveType':
-            return PrimitiveType.type_names[type_id]
+            return '{}'.format(PrimitiveType.type_names[type_id])
         if type_name == 'ArrayType':
-            return type_name + ' of ' + TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
+            return '<{} of {}>'.format(type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
         if type_name == 'RecordType':
-            result_string = type_name + ' with inner variables: {'
+            result_string = '<' + type_name + ' with inner variables: \n{'
             for key, value in TypeTable.table[type_id].inner_declarations.items():
-                result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
-            return type_name + '}'
+                result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(value))
+            return result_string + '}>'
 
 
     @staticmethod
     def get_type(type_id):
+        """
+        :param type_id:
+        :return: object of type
+        """
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
         return TypeTable.table[type_id]
