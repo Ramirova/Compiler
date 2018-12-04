@@ -32,7 +32,7 @@ class TypeTable:
         if type(TypeTable.table[type_id]) == RecordType:
             result_string = type_name + ' {'
             for key, value in TypeTable.table[type_id].inner_declarations.items():
-                result_string += '{}: {}'.format(key, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
+                result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
             return type_name + '}'
 
 
