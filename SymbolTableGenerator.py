@@ -110,7 +110,7 @@ class SymbolTableGenerator(HelloVisitor):
         rhs = ctx.expression()
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
-        if TypeTable.get_type(lhs_type) == 'ArrayType':
+        if TypeTable.get_type_name(lhs_type) == 'ArrayType':
             if TypeTable.table[lhs_type].nested_type_id != rhs_type:
                 raise Exception('Cannot assign {} to array with elements of type {}'.format(rhs_type, lhs_type))
             else:
@@ -118,8 +118,8 @@ class SymbolTableGenerator(HelloVisitor):
         elif lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
             raise Exception('Cannot assign type real to boolean variable')
         elif not TypeUtils.are_compatible(lhs_type, rhs_type):
-            raise Exception('Types {} and {} are not compatible for assignment'.format(TypeTable.get_type(lhs_type),
-                                                                                       TypeTable.get_type(rhs_type)))
+            raise Exception('Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
+                                                                                       TypeTable.get_type_name(rhs_type)))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
@@ -200,7 +200,7 @@ class SymbolTableGenerator(HelloVisitor):
             else:
                 expr_type = self.visitExpression(ctx.expression())
                 if return_type != expr_type:
-                    raise Exception("Return type must be {}".format(TypeTable.get_type(return_type)))
+                    raise Exception("Return type must be {}".format(TypeTable.get_type_name(return_type)))
         else:
             return_type = None
             if ctx.expression() is not None:
@@ -244,7 +244,7 @@ class SymbolTableGenerator(HelloVisitor):
         right_type = self.visitChildren(children[2])
         if left_type != PrimitiveType.boolean or right_type != PrimitiveType.boolean:
             raise Exception('Incompatible types {} and {} in expression, can be applied to boolean only'.format(
-                TypeTable.get_type(left_type), TypeTable.get_type(right_type)))
+                TypeTable.get_type_name(left_type), TypeTable.get_type_name(right_type)))
         self.visitChildren(ctx)
         expression_type = PrimitiveType.boolean
         print expression_type
@@ -343,7 +343,7 @@ class SymbolTableGenerator(HelloVisitor):
             array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
-            return self.current_symbol_table.get_variable_info(array_identifier).variable_type
+            return TypeTable.get_type(self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
         else:
             for i in range(len(children)):
                 if i % 2 == 0:
