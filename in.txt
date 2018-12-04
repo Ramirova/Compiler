@@ -1,1 +1,4 @@
-var a: integer is true;
+routine bubble_sort(b : array[3] integer): integer is
+    var start_loop : integer is 1
+    return start_loop
+end;

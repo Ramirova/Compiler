@@ -4,6 +4,10 @@ from HelloParser import HelloParser
 from TypeTable import *
 import unicodedata
 
+"""
+
+"""
+
 
 class SymbolTableGenerator(HelloVisitor):
     current_symbol_table = SymbolTable(parent=None)
@@ -118,8 +122,9 @@ class SymbolTableGenerator(HelloVisitor):
         elif lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
             raise Exception('Cannot assign type real to boolean variable')
         elif not TypeUtils.are_compatible(lhs_type, rhs_type):
-            raise Exception('Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
-                                                                                       TypeTable.get_type_name(rhs_type)))
+            raise Exception(
+                'Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
+                                                                           TypeTable.get_type_name(rhs_type)))
         return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#routineCall.
@@ -193,6 +198,11 @@ class SymbolTableGenerator(HelloVisitor):
                 parameters[id] = t
         else:
             parameters = None
+        self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
+        body = ctx.body()
+        if body is not None:
+            self.visitBody(body)
+
         if ctx.lang_type() is not None:
             return_type = self.visitLang_type(ctx.lang_type())
             if ctx.expression() is None:
@@ -207,12 +217,8 @@ class SymbolTableGenerator(HelloVisitor):
                 raise Exception("Routine has no return type")
         if self.current_symbol_table.routine_defined_in_scope(identifier):
             raise Exception('Routine {} is already defined'.format(identifier))
-        self.current_symbol_table.add_routine(identifier, parameters, return_type)
-        self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
-        body = ctx.body()
-        if body is not None:
-            self.visitBody(body)
         self.current_symbol_table = self.current_symbol_table.parent_scope
+        self.current_symbol_table.add_routine(identifier, parameters, return_type)
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
@@ -343,7 +349,8 @@ class SymbolTableGenerator(HelloVisitor):
             array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
-            return TypeTable.get_type(self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
+            return TypeTable.get_type(
+                self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
         else:
             for i in range(len(children)):
                 if i % 2 == 0:
