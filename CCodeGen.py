@@ -101,10 +101,14 @@ class CCodeGen(HelloVisitor):
         if len(ctx.children) > 4:
             post_declaration = " = " + ctx.children[5].getText()
         if self.record_state:
+            if isinstance(self.type_table[type_id], ArrayType):
+                identifier += "[" + self.getArraySize(ctx) + "]"
             declaration = identifier_type + " " + identifier + "\n"
             if post_declaration != "":
                 self.record_values += ctx.children[5].getText() + ", "
         else:
+            if isinstance(self.type_table[type_id], ArrayType):
+                identifier += "[" + self.getArraySize(ctx) + "]"
             declaration = identifier_type + " " + identifier + post_declaration
         self.current_queue.append((declaration + ";\n").encode('ascii', 'ignore'))
         print(self.current_queue)

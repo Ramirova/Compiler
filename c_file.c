@@ -7,10 +7,10 @@ double a;
 int bubble_sort() {
 int start_loop = 1;
 int end_loop = 3;
-int arr;
+int arr[3];
 
 for (int i = start_loop; i < end_loop; i++) {
-int a;
+int a[3];
 
 for (int j = start_loop; j < end_loop; j++) {
 }
