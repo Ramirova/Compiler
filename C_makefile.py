@@ -1,10 +1,23 @@
+"""
+Class writes to C file the result of code generation in appropriate order (type definitions, declarations, main method)
+"""
 class C_makefile:
     def __init__(self, typedef_queue, main_queue, routines):
+        """
+        Class initializer
+        :param typedef_queue: list with type definitions in C
+        :param main_queue: list with declarations of variables and routines in C
+        :param routines: list with names of the routines
+        """
         self.typedef_queue = typedef_queue
         self.main_queue = main_queue
         self.routines = routines
 
     def make_file(self):
+        """
+        Method makes the resulting file
+        :return:
+        """
         file = open("c_file.c", "w+")
         file.write("#include <stdio.h>\n")
 
@@ -20,6 +33,10 @@ class C_makefile:
         file.close()
 
     def make_main(self):
+        """
+        Method makes main method
+        :return: string with main method of the C program
+        """
         main = ""
         main += "int main (int argc, char *argv[]) {\n"
         main += "if argc > 0 {\n"

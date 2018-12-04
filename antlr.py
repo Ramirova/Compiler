@@ -22,15 +22,13 @@ def main():
     # printer = HelloPrintListener()
     printer = SymbolTableGenerator()
     printer = printer.visit(tree)
-    visitor = CCodeGen([])
+    visitor = CCodeGen()
     visitor.visit(tree)
     print(visitor.type_def_queue)
     print(visitor.queue)
     print(visitor.routines)
     makefile = C_makefile(visitor.type_def_queue, visitor.queue, visitor.routines)
     makefile.make_file()
-    # walker = ParseTreeWalker()
-    # walker.walk(printer, tree)
 
 if __name__ == '__main__':
     main()
