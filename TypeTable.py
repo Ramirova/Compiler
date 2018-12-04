@@ -25,11 +25,11 @@ class TypeTable:
         if type_id not in TypeTable.table.keys():
             raise Exception("cannot find type with id {}".format(type_id))
         type_name = TypeTable.table[type_id].__class__.__name__
-        if type(TypeTable.table[type_id]) == PrimitiveType:
+        if type_name == 'PrimitiveType':
             return type_name + PrimitiveType.types[type_id]
-        if type(TypeTable.table[type_id]) == ArrayType:
+        if type_name == 'ArrayType':
             return type_name + TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
-        if type(TypeTable.table[type_id]) == RecordType:
+        if type_name == 'RecordType':
             result_string = type_name + ' {'
             for key, value in TypeTable.table[type_id].inner_declarations.items():
                 result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id))
