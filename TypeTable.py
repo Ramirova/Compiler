@@ -121,7 +121,9 @@ class AliasType:
 
 
 class TypeUtils:
-
+    """
+    Contains several useful functions to work with types
+    """
     def __init__(self):
         pass
 

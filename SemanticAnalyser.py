@@ -357,6 +357,8 @@ class SemanticAnalyser(HelloVisitor):
         #  if one child get and return type
         if len(children) <= 1:
             expression_type = self.visitRelation(children[0])
+            if expression_type is None:
+                raise Exception("Attempt to call a routine, which doesn't return anything")
             return expression_type
 
         #  if both relations are present get their types
