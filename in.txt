@@ -1,5 +1,7 @@
 var start_loop: integer;
 routine bubble_sort(b : array[3] integer): integer is
     var start_loop : integer is 1
+    var end_loop: integer is 3
+    for i in start_loop..end_loop loop end
     return start_loop
 end;
