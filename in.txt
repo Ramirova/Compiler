@@ -1,5 +1,49 @@
-routine bubble_sort: integer is
+type sorting_array_type is array[3] integer;
+var my_array : sorting_array;
+
+routine init_and_start(a: sorting_array_type) is
+    var e1 : integer is 1
+    var e2 : integer is 2
+    var e3 : integer is 3
+    a[1] := e1
+    a[2] := e2
+    a[3] := e3
+    bubble_sort(a)
+    end;
+
+routine bubble_sort(a : sorting_array_type) is
     var start_loop : integer is 1
-    return start_loop
+    var end_loop : integer is 3
+    var start_second_loop : integer is 1
+    var end_second_loop : integer is 3
+    var flag : intger is 1
+    for j in start_loop..end_loop loop
+        for i in start_second_loop..(end_second_loop-j) loop
+            if a[i] > a[i + 1] then
+                temp := a[i]
+                a[i] := a[i + 1]
+                a[i + 1] := temp
+                flag := 2
+                end
+            i := i + 1
+            if flag = 1 then i := 3 end
+        j := j + 1
+        end
+     end
 end;
 
+routine insertion_sort(a : sorting_array_type) is
+    var start_loop : integer is 2
+    var end_loop : integer is 3
+    for i in start_loop..end_loop loop
+        var x is a[i]
+        var j is i
+            while j > 1 and a[j - 1] > x loop
+                a[j] := a[j - 1]
+                j := j - 1
+            end
+        a[j] := x
+     end
+end;
+
+var result is init_and_start(my_array);
