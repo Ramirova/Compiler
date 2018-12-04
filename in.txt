@@ -1,7 +1,17 @@
-routine init_and_start(a: array[3] integer): integer is
-    var e1 : integer is 1
-    return e1
-    end;
-
-var my_array : array[3] integer;
-var res is init_and_start(my_array);
+var start_loop: integer;
+var a: real;
+routine bubble_sort(b : array[3] integer): integer is
+    var start_loop : integer is 1
+    var end_loop: integer is 3
+    var arr: array[3] integer
+    for i in start_loop..end_loop loop
+        var a: array[3] integer
+        for j in start_loop..end_loop loop
+            bubble_sort(a)
+        end
+        if 5 > 6 then
+            var c: integer
+        end
+    end
+    return start_loop
+end;
