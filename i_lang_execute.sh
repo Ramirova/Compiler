@@ -1,5 +1,5 @@
 #!/bin/bash
 
-python2 antlr.py
+python2 Main.py
 gcc -Wall c_file.c -o exec
 ./exec $*

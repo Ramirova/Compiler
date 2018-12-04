@@ -74,9 +74,7 @@ class CCodeGen(HelloVisitor):
             type_id = self.current_scope.scope[identifier].variable_type
         if ctx.children[3].getText() not in AliasType.table:
             identifier_type = self.getVariableType(identifier, type_id, ctx)
-            if isinstance(self.type_table[type_id], ArrayType):
-                identifier_type += "[" + self.getArraySize(ctx) + "]"
-            elif isinstance(self.type_table[type_id], RecordType):
+            if isinstance(self.type_table[type_id], RecordType):
                 print("qq", ctx.children[3].children[0].children[0].children[1].getText())
                 self.record_state = True
                 self.current_queue = self.type_def_queue
@@ -259,8 +257,6 @@ class CCodeGen(HelloVisitor):
         """
         self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.number_of_loops += 1
-        self.current_queue.append(("int " + ctx.children[1].getText() +
-                                   " = " + ctx.children[3].getText().split("..")[0]).encode('ascii', 'ignore'))
         iterator = ctx.children[1].getText()
         loop_range = ctx.children[3].getText().split("..")
         self.current_queue.append(("\nfor (int " + iterator + " = " + loop_range[0] + "; "

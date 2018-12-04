@@ -1,19 +1,30 @@
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
-void init_and_start() {
-int e1 = 1;
-return e1;
+int start_loop;
+double a;
+int bubble_sort() {
+int start_loop = 1;
+int end_loop = 3;
+int arr;
+
+for (int i = start_loop; i < end_loop; i++) {
+int a;
+
+for (int j = start_loop; j < end_loop; j++) {
 }
-int[3] my_array;
-int res = init_and_start(my_array);
+if (5>6) {
+int c;
+}
+}
+return start_loop;}
 
 int main (int argc, char *argv[]) {
-if argc > 0 {
-switch(argv[0]) {
-case init_and_start:
-init_and_start(argv)
-break;
-default:
- break;
+if (argc > 1) {
+if (strcmp(argv[1], "bubble_sort") > 0) {
+bubble_sort();
+}
+
 }
 }

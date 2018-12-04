@@ -53,9 +53,8 @@ class C_makefile:
             else:
                 main += "("
                 parameters = SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters
-                print(parameters)
                 for j in range(len(parameters)):
-                    main += self.get_param_type(parameters[j]) + "argc[" + str(j + 2) + "], "
+                    main += self.get_param_type(parameters[j]) + "argv[" + str(j + 2) + "], "
                 main = main[:-2]
                 main += ");\n"
             main += "}\n"
