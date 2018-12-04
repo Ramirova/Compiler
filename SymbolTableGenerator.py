@@ -86,7 +86,6 @@ class SymbolTableGenerator(HelloVisitor):
                 var_name = unicodedata.normalize('NFKD', c.children[1].getText()).encode('ascii', 'ignore')
                 var_type = self.visitLang_type(c)
                 record_variables[var_name] = var_type
-        recur = self.visitChildren(ctx)
         new_type = RecordType(record_variables)
         self.current_symbol_table = self.current_symbol_table.parent_scope
         self.current_symbol_table.remove_child_scope('current_record')
@@ -179,7 +178,6 @@ class SymbolTableGenerator(HelloVisitor):
             self.current_symbol_table = self.current_symbol_table.parent_scope
             self.current_symbol_table.remove_child_scope('else')
 
-
     # Visit a parse tree produced by HelloParser#routineDeclaration.
     def visitRoutineDeclaration(self, ctx):
         identifier = unicodedata.normalize('NFKD', ctx.Identifier().getText()).encode('ascii', 'ignore')
@@ -197,15 +195,22 @@ class SymbolTableGenerator(HelloVisitor):
             parameters = None
         if ctx.lang_type() is not None:
             return_type = self.visitLang_type(ctx.lang_type())
+            if ctx.expression() is None:
+                raise Exception("Routine must have a return statement")
+            else:
+                expr_type = self.visitExpression(ctx.expression())
+                if return_type != expr_type:
+                    raise Exception("Return type must be {}".format(TypeTable.get_type(return_type)))
         else:
             return_type = None
+            if ctx.expression() is not None:
+                raise Exception("Routine has no return type")
         if self.current_symbol_table.routine_defined_in_scope(identifier):
             raise Exception('Routine {} is already defined'.format(identifier))
         self.current_symbol_table.add_routine(identifier, parameters, return_type)
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
-        peremennaya = self.visitChildren(ctx)
+
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        return peremennaya
 
     # Visit a parse tree produced by HelloParser#parameters.
     def visitParameters(self, ctx):
