@@ -26,7 +26,7 @@ class TypeTable:
             raise Exception("cannot find type with id {}".format(type_id))
         type_name = TypeTable.table[type_id].__class__.__name__
         if type_name == 'PrimitiveType':
-            return type_name + PrimitiveType.types[type_id]
+            return type_name + PrimitiveType.type_names[type_id]
         if type_name == 'ArrayType':
             return type_name + TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
         if type_name == 'RecordType':
@@ -54,6 +54,7 @@ class PrimitiveType:
     boolean = 3
 
     types = {'integer': 1, 'real': 2, 'boolean': 3}
+    type_names = {1: 'integer', 2: 'real', 3: 'boolean'}
 
     def __init__(self):
         pass
