@@ -3,6 +3,7 @@ class SymbolTable:
     This class represents symbol table. It supports supports a hierarchy of tables, that correspond to
     """
     root_table = None
+    inner_scope_name = 'inner_scope_'
 
     def __init__(self, parent):
         if parent is None and SymbolTable.root_table is None:
@@ -105,7 +106,7 @@ class SymbolTable:
             raise Exception("While, for and if cannot be used in the global scope. Cannot create a general"
                             "inner scope for global scope, only one for a routine")
         self.routine_inner_scopes_counter += 1
-        return "inner_scope{}".format(self.routine_inner_scopes_counter)
+        return "{}{}".format(SymbolTable.inner_scope_name, self.routine_inner_scopes_counter)
 
     def is_root_table(self):
         """
@@ -117,11 +118,16 @@ class SymbolTable:
         self.routine_inner_scopes_counter = 0
 
     @staticmethod
-    def reset_counters(current_table=root_table):
+    def reset_counters(current_table=None):
+        """
+        Resets all counters in all tables in the hierarchy.
+        :param current_table:
+        """
+        if current_table is None:
+            current_table = SymbolTable.root_table
         current_table.reset_counter()
         for child_table in current_table.child_scopes.values():
             SymbolTable.reset_counters(child_table)
-        pass
 
 
 class SymbolTableEntry:
