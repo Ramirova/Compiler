@@ -14,7 +14,7 @@ class TypeTable:
     def __init__(self):
         pass
 
-    table = {} # Table with types
+    table = {}  # Table with types
 
     @staticmethod
     def add_type(type_id, type_content):
@@ -119,7 +119,7 @@ class TypeUtils:
             return True
 
         if type_id_1 == PrimitiveType.boolean and type_id_2 == PrimitiveType.real:
-            raise Exception('Cannot assign type real to boolean variable')
+            return False
 
         if type_id_1 in [1, 2, 3] and type_id_2 in [1, 2, 3]:
             return True

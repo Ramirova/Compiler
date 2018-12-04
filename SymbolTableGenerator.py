@@ -161,69 +161,114 @@ class SymbolTableGenerator(HelloVisitor):
             else:
                 return self.visitChildren(ctx)
         #  check for assignment of real to boolean
-        elif lhs_type == PrimitiveType.boolean and rhs_type == PrimitiveType.real:
-            raise Exception('Cannot assign type real to boolean variable')
-        elif not TypeUtils.are_compatible(lhs_type, rhs_type):
+        elif not TypeUtils.are_compatible_for_assignment(lhs_type, rhs_type):
             raise Exception(
                 'Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
                                                                            TypeTable.get_type_name(rhs_type)))
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
-        #  getting routine name and return type
+        #  getting context children, routine name and return type
+        children = ctx.children
         routine_name = self.unicode_to_str(ctx.Identifier().getText())
         return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+        routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
         #  check if routine was defined
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
             raise Exception('Routine {} is not defined'.format(routine_name))
 
-        self.visitChildren(ctx)
+        #  constructing routine call argument list
+        arguments = []
+        for c in children:
+            if type(c) == HelloParser.ExpressionContext:
+                arguments.append(c)
+
+        #  check number of arguments compatibility
+        if len(routine_parameters) != len(arguments):
+            raise Exception("Wrong number of arguments in routine call {}".format(routine_name))
+
+        #  check argument types and parameter types compatibility
+        for p, a in zip(routine_parameters, arguments):
+            argument_type = self.visitExpression(a)
+            if not TypeUtils.are_compatible_for_assignment(p, argument_type):
+                raise Exception(
+                    'Parameter of type {} and argument of type {} are not compatible in {} routine call'.format(
+                        TypeTable.get_type_name(p),
+                        TypeTable.get_type_name(argument_type), routine_name))
         return return_type
 
     # Visit a parse tree produced by HelloParser#whileLoop.
     def visitWhileLoop(self, ctx):
+        #  creating new scope for while loop
         self.current_symbol_table = self.current_symbol_table.create_child_scope(
             self.current_symbol_table.get_new_inner_scope_name())
-        recur = self.visitChildren(ctx)
+
+        #  visiting while loop context children
+        self.visitChildren(ctx)
+
+        #  returning to higher scope
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        return recur
 
     # Visit a parse tree produced by HelloParser#forLoop.
     def visitForLoop(self, ctx):
+        #  creating new scope for 'for' loop
         self.current_symbol_table = self.current_symbol_table.create_child_scope(
             self.current_symbol_table.get_new_inner_scope_name())
-        identifier = ctx.Identifier().getText()
-        identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+
+        #  adding loop iteration variable to loops scope
+        identifier = self.unicode_to_str(ctx.Identifier().getText())
         self.current_symbol_table.add_variable(identifier, PrimitiveType.integer)
-        recur = self.visitChildren(ctx)
+
+        #  visiting for loop context children
+        self.visitChildren(ctx)
+
+        #  returning to higher scope
         self.current_symbol_table = self.current_symbol_table.parent_scope
-        return recur
 
     # Visit a parse tree produced by HelloParser#lang_range.
     def visitLang_range(self, ctx):
+        #  getting context children, start and end of the range and theit types
         children = ctx.children
         start_range = children[0]
         end_range = children[2]
         start_type = self.visitExpression(start_range)
         end_type = self.visitExpression(end_range)
+
+        #  check range boundaries to be integers
         if start_type != PrimitiveType.integer or end_type != PrimitiveType.integer:
             raise Exception('Range boundaries are not integer numbers')
-        return self.visitChildren(ctx)
 
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
+        #  getting context children
         children = ctx.children
+        expression = children[1]
+
+        #   creating new scope for if statement
         self.current_symbol_table = self.current_symbol_table.create_child_scope(
             self.current_symbol_table.get_new_inner_scope_name())
-        if self.visitExpression(children[1]) != PrimitiveType.boolean:
+
+        #  check if condition to be boolean
+        if self.visitExpression(expression) != PrimitiveType.boolean:
             raise Exception("Condition of if statement is not boolean")
-        recur = self.visitBody(children[3])
+
+        #  visit if body
+        self.visitBody(children[3])
+
+        #  returning to higher scope
         self.current_symbol_table = self.current_symbol_table.parent_scope
+
+        #  check else case
         if len(children) > 5:
+            #  creating new scope for else statement
             self.current_symbol_table = self.current_symbol_table.create_child_scope(
                 self.current_symbol_table.get_new_inner_scope_name())
-            recur = self.visitBody(children[5])
+
+            #  visit else body
+            self.visitBody(children[5])
+
+            #  returning to higher scope
             self.current_symbol_table = self.current_symbol_table.parent_scope
 
     # Visit a parse tree produced by HelloParser#routineDeclaration.
@@ -236,10 +281,10 @@ class SymbolTableGenerator(HelloVisitor):
             for i in range(len(parameters_context)):
                 if i % 2 == 1:
                     declarations.append(parameters_context[i])
-            parameters = {}
+            parameters = []
             for d in declarations:
-                id, t = self.visitParameterDeclaration(d)
-                parameters[id] = t
+                _, t = self.visitParameterDeclaration(d)
+                parameters.append(t)
         else:
             parameters = None
 
