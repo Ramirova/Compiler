@@ -90,6 +90,13 @@ class SymbolTable:
         else:
             return True
 
+    def get_new_inner_scope_name(self):
+        if self.parent_scope is None:
+            raise Exception("While, for and if cannot be used in the global scope. Cannot create a general"
+                            "inner scope for global scope, only one for a routine")
+        self.routine_inner_scopes_counter += 1
+        return "inner_scope{}".format(self.routine_inner_scopes_counter)
+
 
 class SymbolTableEntry:
     def __init__(self, used, variable_type, variable_name):
@@ -105,5 +112,3 @@ class RoutineTableEntry:
         self.name = name
         self.parameters = parameters
         self.return_type = return_type
-
-
