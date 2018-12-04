@@ -474,7 +474,7 @@ class SymbolTableGenerator(HelloVisitor):
             return self.current_symbol_table.get_variable_info(identifier).variable_type
         elif type(children[2]) is HelloParser.ExpressionContext:
             array_identifier = children[0].getText()
-            array_idenIftifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
+            array_identifier = unicodedata.normalize('NFKD', array_identifier).encode('ascii', 'ignore')
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
             return TypeTable.get_type(
