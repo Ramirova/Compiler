@@ -11,6 +11,7 @@ class SymbolTable:
         self.scope = {}
         self.child_scopes = {}
         self.routines = {}
+        self.routine_inner_scopes_counter = 0
 
     def get_variable_info(self, variable_name):
         if self.parent_scope is None and not self.is_defined_in_scope(variable_name):
@@ -75,8 +76,17 @@ class SymbolTable:
             return True
 
     def is_defined_in_current_scope(self, variable_name):
-        if variable_name not in self.scope.keys():
-            return False
+        return self.aux_is_defined_in_current_scope(variable_name, self.parent_scope is None)
+
+    def aux_is_defined_in_current_scope(self, variable_name, is_root_scope):
+        if is_root_scope:
+            return variable_name in self.routines.keys()
+
+        if variable_name not in self.routines.keys():
+            if self.parent_scope.parent_scope is not None:
+                return self.parent_scope.aux_is_defined_in_current_scope(variable_name, is_root_scope)
+            else:
+                return False
         else:
             return True
 
