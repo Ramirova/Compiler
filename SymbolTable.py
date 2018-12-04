@@ -80,9 +80,9 @@ class SymbolTable:
 
     def aux_is_defined_in_current_scope(self, variable_name, is_root_scope):
         if is_root_scope:
-            return variable_name in self.routines.keys()
+            return variable_name in self.scope.keys()
 
-        if variable_name not in self.routines.keys():
+        if variable_name not in self.scope.keys():
             if self.parent_scope.parent_scope is not None:
                 return self.parent_scope.aux_is_defined_in_current_scope(variable_name, is_root_scope)
             else:
