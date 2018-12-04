@@ -113,6 +113,16 @@ class SymbolTable:
         """
         return self.parent_scope is None
 
+    def reset_counter(self):
+        self.routine_inner_scopes_counter = 0
+
+    @staticmethod
+    def reset_counters(current_table=root_table):
+        current_table.reset_counter()
+        for child_table in current_table.child_scopes.values():
+            SymbolTable.reset_counters(child_table)
+        pass
+
 
 class SymbolTableEntry:
     def __init__(self, used, variable_type, variable_name):
