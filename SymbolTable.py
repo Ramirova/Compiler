@@ -48,6 +48,12 @@ class SymbolTable:
         self.scope[variable_name] = SymbolTableEntry(False, variable_type, variable_name)
 
     def add_routine(self, routine_name, parameters, return_type):
+        """
+        :param routine_name:
+        :param parameters: an o
+        :param return_type:
+        :return:
+        """
         if not self.is_root_table():
             raise Exception('Routines can only be added to the global scope, i.e. to the root table')
         self.routines[routine_name] = RoutineTableEntry(routine_name, parameters, return_type)
@@ -87,6 +93,11 @@ class SymbolTable:
             return True
 
     def is_defined_in_current_scope(self, variable_name):
+        """
+        :param variable_name:
+        :return: whether variable is defined in current scope (scopes of if, while and for are considered
+                 to be in the same scope of routine)
+        """
         return self.aux_is_defined_in_current_scope(variable_name, self.parent_scope is None)
 
     def aux_is_defined_in_current_scope(self, variable_name, is_root_scope):
