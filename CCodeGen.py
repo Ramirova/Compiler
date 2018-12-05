@@ -115,7 +115,7 @@ class CCodeGen(HelloVisitor):
             if isinstance(self.type_table[type_id], ArrayType):
                 identifier += "[" + self.getArraySize(ctx) + "]"
             declaration = identifier_type + " " + identifier + "\n"
-            if post_declaration != "":
+            if post_declaration != "" and len(ctx.children) > 4:
                 self.record_values += ctx.children[5].getText() + ", "
         else:
             if array_identifier != "":
