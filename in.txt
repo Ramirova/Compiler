@@ -1,4 +1,4 @@
-routine bubble_sort(l: integer, p: boolean): record var a : integer end is
-    var rec: record var a is 1 end
-    return rec
+routine bubble_sort: integer is
+    var b : integer
+    return b
 end;
