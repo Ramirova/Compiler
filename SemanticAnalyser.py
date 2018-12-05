@@ -157,7 +157,8 @@ class SemanticAnalyser(HelloVisitor):
             raise Exception('variable {} cannot be modified'.format(lhs_name))
 
         #  checking assignment types compatibility
-        if TypeTable.get_type_name(lhs_type) == 'ArrayType':
+        if TypeTable.get_type(self.current_symbol_table.get_variable_info(lhs_name).variable_type).__class__.__name__\
+                == 'ArrayType':
             #  if trying to assign incompatible type to an array element
             if TypeTable.table[lhs_type].nested_type_id != rhs_type:
                 raise Exception(
