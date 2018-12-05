@@ -181,7 +181,6 @@ class CCodeGen(HelloVisitor):
                 alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        print(alias_type)
         result = "typedef " + alias_type + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
@@ -374,10 +373,12 @@ class CCodeGen(HelloVisitor):
         return_type = "void"
         if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
             return_type = self.c_type_map[ctx.children[3].getText()]
-        if ":" in ctx.children[3].getText(): #If there are arguments, but there is return type
+        if ":" in ctx.children[3].getText() and "is" not in ctx.children[2].getText(): #If there are arguments, but there is return type
             raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
             if raw_return_type in self.c_type_map:
                 return_type = self.c_type_map[raw_return_type]
+            elif raw_return_type in AliasType.table and isinstance(TypeTable.table[AliasType.table[raw_return_type]], ArrayType):
+                return_type = raw_return_type + "*"
             else:
                 if "array" in raw_return_type:
                     array_return_type = raw_return_type.split("]")[1]
@@ -385,6 +386,8 @@ class CCodeGen(HelloVisitor):
                         return_type = self.c_type_map[array_return_type] + "*"
                     else:
                         return_type = array_return_type + "*"
+                else:
+                    return_type = raw_return_type
 
         if args is not "":
             args = args[:-2]
