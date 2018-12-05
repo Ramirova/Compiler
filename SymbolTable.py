@@ -41,14 +41,15 @@ class SymbolTable:
         if self.routine_defined_in_scope(routine_name):
             return SymbolTable.root_table.routines[routine_name]
 
-    def add_variable(self, variable_name, variable_type):
+    def add_variable(self, variable_name, variable_type, modifiable=True):
         """
         Adds new variable
+        :param modifiable: whether the variable can be modified
         :param variable_name:
         :param variable_type:
         :return:
         """
-        self.scope[variable_name] = SymbolTableEntry(variable_type, variable_name)
+        self.scope[variable_name] = SymbolTableEntry(variable_type, variable_name, modifiable)
 
     def add_routine(self, routine_name, parameters, return_type):
         """
@@ -158,13 +159,14 @@ class SymbolTableEntry:
     """
     Represents a single tale entry in a symbol table
     """
-    def __init__(self, variable_type, variable_name):
+    def __init__(self, variable_type, variable_name, modifiable):
         """
         :param variable_type: id of the type
         :param variable_name: name of the variable
         """
         self.variable_type = variable_type
         self.variable_name = variable_name
+        self.modifiable = modifiable
 
 
 class RoutineTableEntry:

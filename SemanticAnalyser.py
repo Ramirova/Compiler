@@ -152,6 +152,11 @@ class SemanticAnalyser(HelloVisitor):
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
 
+        lhs_name = self.unicode_to_str(ctx.children[0].getText())
+
+        if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
+            raise Exception('variable {} cannot be modified'.format(lhs_name))
+
         #  checking assignment types compatibility
         if TypeTable.get_type_name(lhs_type) == 'ArrayType':
             #  if trying to assign incompatible type to an array element
@@ -228,7 +233,7 @@ class SemanticAnalyser(HelloVisitor):
 
         #  adding loop iteration variable to loops scope
         identifier = self.unicode_to_str(ctx.Identifier().getText())
-        self.current_symbol_table.add_variable(identifier, PrimitiveType.integer)
+        self.current_symbol_table.add_variable(identifier, PrimitiveType.integer, False)
 
         #  visiting for loop context children
         self.visitChildren(ctx)
