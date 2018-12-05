@@ -48,6 +48,7 @@ class CCodeGen(HelloVisitor):
         self.routines = [] # List with the names of all routines declared
         self.record_values = "" # Variable stores the values in record that we currently translate
         self.scope_number = 0 #sequential number of subcscope in routine
+        self.main_allocs = []
         SymbolTable.reset_counters()
 
     def visitProgram(self, ctx):
@@ -115,8 +116,12 @@ class CCodeGen(HelloVisitor):
                 self.record_values += ctx.children[5].getText() + ", "
         else:
             if array_identifier != "":
-                declaration = identifier_type + " " + identifier + "_array_to_point" + array_identifier + post_declaration + ';\n'
-                declaration += identifier_type + "* " + identifier + " = " + identifier + "_array_to_point"
+                declaration = identifier_type + "* " + identifier + post_declaration
+                alloc = " = malloc (" + str((array_identifier[1:-1])) + "*sizeof(" + identifier_type + '))'
+                if self.current_scope == SymbolTable.root_table:
+                    self.main_allocs.append(identifier + alloc + ";\n")
+                else:
+                    declaration += alloc
             else:
                 declaration = identifier_type + " " + identifier + post_declaration
         self.current_queue.append((declaration + ";\n").encode('ascii', 'ignore'))
@@ -321,7 +326,6 @@ class CCodeGen(HelloVisitor):
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
         self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
         return_type_predeclarations = ""
-        print("q", ctx.children[2].getText())
         routine_args = ""
         # if ctx.children[2].getText() != ":":
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
@@ -332,17 +336,13 @@ class CCodeGen(HelloVisitor):
                 type = arg.split(":")[1]
                 type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
                 arg_type = self.type_table[type_id]
-                print(arg_type)
                 if isinstance(arg_type, PrimitiveType):
                     args += self.primitive_type_map[type_id] + " " + name + ", "
-                elif isinstance(arg_type, ArrayType):
-                    args += type + " *" + name + ", "
                 else:
                     type_name, inner_type = self.getRoutineReturnType(type_id)
                     if type_name == "ArrayType":
                         args += self.c_type_map[inner_type] + "* " + name + ", "
         return_type = "void"
-        print("zz", ctx.children[4].getText())
         if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
             return_type = self.c_type_map[ctx.children[3].getText()]
         if ":" in ctx.children[3].getText(): #If there are arguments, but there is return type
@@ -364,9 +364,6 @@ class CCodeGen(HelloVisitor):
         return visit_children
 
     def getRoutineReturnType(self, type_id):
-        print("In inner method")
-        print(type_id)
-        print(TypeTable.table.keys())
         type_name = TypeTable.table[type_id].__class__.__name__
         if type_name == 'PrimitiveType':
             return '{}'.format(PrimitiveType.type_names[type_id])

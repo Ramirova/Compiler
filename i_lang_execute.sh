@@ -1,5 +1,5 @@
 #!/bin/bash
 
 python2 Main.py
-gcc -Wall c_file.c -o exec
+gcc c_file.c -w -o exec
 ./exec $*

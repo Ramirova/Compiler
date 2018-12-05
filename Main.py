@@ -17,7 +17,7 @@ def main():
     printer = printer.visit(tree)
     visitor = CCodeGen()
     visitor.visit(tree)
-    makefile = C_makefile(visitor.type_def_queue, visitor.queue, visitor.routines)
+    makefile = C_makefile(visitor.type_def_queue, visitor.queue, visitor.routines, visitor.main_allocs)
     makefile.make_file()
 
 

@@ -5,7 +5,7 @@ from SymbolTable import *
 
 
 class C_makefile:
-    def __init__(self, typedef_queue, main_queue, routines):
+    def __init__(self, typedef_queue, main_queue, routines, alloc_queue):
         """
         Class initializer
         :param typedef_queue: list with type definitions in C
@@ -15,6 +15,7 @@ class C_makefile:
         self.typedef_queue = typedef_queue
         self.main_queue = main_queue
         self.routines = routines
+        self.alloc_queue = alloc_queue
 
     def make_file(self):
         """
@@ -22,7 +23,7 @@ class C_makefile:
         :return:
         """
         file = open("c_file.c", "w+")
-        file.write("#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n")
+        file.write("#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n#include<stdlib.h>\n")
 
         for typedef in self.typedef_queue:
             file.write(typedef)
@@ -45,13 +46,15 @@ class C_makefile:
         """
         main = ""
         main += "int main (int argc, char *argv[]) {\n"
+        for alloc in self.alloc_queue:
+            main += alloc
         main += "if (argc > 1) {\n"
 
         # main += "const char *routines[" + len(self.routines) + "] = { "
         for i in range(len(self.routines)):
             parameters = SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters
             if parameters is None or len(filter(lambda x: (x < 0 or x > 3), parameters)) == 0:
-                main += "if (strcmp(argv[1], \"" + self.routines[i] + "\") > 0) {\n"
+                main += "if (strcmp(argv[1], \"" + self.routines[i] + "\") == 0) {\n"
                 main += self.routines[i]
                 if parameters is None:
                     main += '();\n'
