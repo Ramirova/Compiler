@@ -239,8 +239,20 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the assignment
         :return: the result of the visit all its children
         """
+        cast_type = ""
+        left_type = ""
+        right_type = ""
+        right_side = ctx.children[2].getText().encode('ascii', 'ignore')
+        left_side = ctx.children[0].getText().encode('ascii', 'ignore')
+        if left_side in self.current_scope.scope:
+            left_type = self.current_scope.scope[left_side].variable_type
+        if right_side in self.current_scope.scope:
+            right_type = self.current_scope.scope[right_side].variable_type
+        if left_type in self.prinf_type_map:
+            if "(" in right_side or (left_type in self.primitive_type_map and left_type != right_type):
+                cast_type = "(" + self.primitive_type_map[left_type] + ")"
         self.current_queue.append(
-            (ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";\n").encode('ascii', 'ignore'))
+            (ctx.children[0].getText() + " = " + cast_type + right_side + ";\n").encode('ascii', 'ignore'))
         return self.visitChildren(ctx)
 
     def visitRoutineCall(self, ctx):
@@ -361,7 +373,6 @@ class CCodeGen(HelloVisitor):
             return_type = self.c_type_map[ctx.children[3].getText()]
         if ":" in ctx.children[3].getText(): #If there are arguments, but there is return type
             raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
-            return_type = ""
             if raw_return_type in self.c_type_map:
                 return_type = self.c_type_map[raw_return_type]
             else:
