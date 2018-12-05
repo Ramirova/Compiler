@@ -35,6 +35,9 @@ class C_makefile:
         file.write(self.make_main())
         file.close()
 
+    def get_bool_handler_function(self):
+        return "const char * bool_hadler(int arg) { if arg == 1 return \"true\" else return \"false\""
+
     def make_main(self):
         """
         Method makes main method

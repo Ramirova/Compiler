@@ -1,3 +1,4 @@
+import SemanticAnalyser
 from lexical_and_syntax_analysis.HelloVisitor import HelloVisitor
 from SymbolTable import *
 from TypeTable import *
@@ -23,6 +24,12 @@ class CCodeGen(HelloVisitor):
         1: "int",
         2: "double",
         3: "bool"
+    }
+
+    prinf_type_map = {
+        1: "%d",
+        2: "lf",
+        3: "%c"
     }
 
     def __init__(self):
@@ -236,6 +243,18 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the routine call
         :return: the result of the visit all its children
         """
+        routine_name = ctx.Identifier().getText().encode('ascii', 'ignore')
+        if routine_name == 'print':
+            type = self.prinf_type_map[SemanticAnalyser.SemanticAnalyser.visitExpression(ctx.expression())]
+            self.current_queue.append("printf (\"" + type + ", ")
+            if type == 3:
+                self.current_queue.append("bool_hadler(")
+            self.visitChildren()
+            if type == 3:
+                self.current_queue.append("));\n")
+            else:
+                self.current_queue.append(");\n")
+            return
         self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
         return self.visitChildren(ctx)
 
@@ -301,7 +320,7 @@ class CCodeGen(HelloVisitor):
         """
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
         self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
-
+        return_type_predeclarations = ""
         print("q", ctx.children[2].getText())
         routine_args = ""
         # if ctx.children[2].getText() != ":":
@@ -321,10 +340,23 @@ class CCodeGen(HelloVisitor):
                     args += self.c_type_map[arg_type] + " " + name + ", "
         return_type = "void"
         print("zz", ctx.children[4].getText())
-        if ":" in routine_args and len(routine_args) == 1:
-            return_type = self.c_type_map[ctx.children[3].getText()]
-        if  ":" in ctx.children[3].getText():
-            return_type = self.c_type_map[ctx.children[4].getText()]
+        if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
+            return_type_id = self.current_scope.scope[ctx.children[3].getText().encode('ascii', 'ignore')].variable_type
+            return_type = self.type_table[return_type_id]
+        if ":" in ctx.children[3].getText():#If there are arguments, but there is return type
+            # print(ctx.children[4].getText())
+            # print(TypeTable.get_type(self.current_scope.get_routine_info(ctx.children[1].getText()).return_type))
+            if (isinstance(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type], RecordType)):
+                # self.
+                return_type_predeclarations = "struct current_function_return_struct" + str(len(self.routines)) + self.visitRecordType(ctx.children[4])
+                print(return_type_predeclarations)
+            print(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type])
+            type = self.getRoutineReturnType(self.current_scope.get_routine_info(ctx.children[1].getText()).return_type)
+            # print(self.current_scope.get_routine_info(ctx.children[1].getText()))
+            print(type)
+            return_type_id = self.current_scope.scope[ctx.children[4].getText().encode('ascii', 'ignore')].variable_type
+            return_type = self.type_table[return_type_id]
+
         if args is not "":
             args = args[:-2]
         routine_declaration = return_type + " " + ctx.children[1].getText() + "(" + args + ")" + " {\n"
@@ -340,6 +372,21 @@ class CCodeGen(HelloVisitor):
         self.current_queue.append("}\n")
         print(self.current_queue)
         return visit_children
+
+    def getRoutineReturnType(self, type_id):
+        print("In inner method")
+        print(type_id)
+        print(TypeTable.table.keys())
+        type_name = TypeTable.table[type_id].__class__.__name__
+        if type_name == 'PrimitiveType':
+            return '{}'.format(PrimitiveType.type_names[type_id])
+        if type_name == 'ArrayType':
+            return type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
+        if type_name == 'RecordType':
+            result_string = '<' + type_name + ' with inner variables: \n{'
+            for key, value in TypeTable.table[type_id].inner_declarations.items():
+                result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(value))
+            return result_string + '}>'
 
     def visitParameters(self, ctx):
         """

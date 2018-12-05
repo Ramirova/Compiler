@@ -1,0 +1,3 @@
+routine bubble_sort(l: integer, p: boolean) is
+    var arr: array[3] integer
+end;
