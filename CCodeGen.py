@@ -28,7 +28,7 @@ class CCodeGen(HelloVisitor):
 
     prinf_type_map = {
         1: "%d",
-        2: "lf",
+        2: "%f",
         3: "%c"
     }
 
@@ -270,7 +270,7 @@ class CCodeGen(HelloVisitor):
             type = self.prinf_type_map[TypeTable.get_aux_type()]
             # semantic_analyser = SemanticAnalyser()
             # type = self.prinf_type_map[semantic_analyser.visitExpression(ctx.expression())]
-            self.current_queue.append("printf (\"" + type + "\", ")
+            self.current_queue.append("printf(\"" + type + "\", ")
             if type == 3:
                 self.current_queue.append("bool_handler(")
             if len(ctx.children) >= 3:
@@ -279,6 +279,7 @@ class CCodeGen(HelloVisitor):
                 self.current_queue.append("));\n")
             else:
                 self.current_queue.append(");\n")
+            self.current_queue.append("printf(\"%s\", \"\\n\");\n")
             return
         self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";\n")
         return self.visitChildren(ctx)
