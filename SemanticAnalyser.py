@@ -152,8 +152,7 @@ class SemanticAnalyser(HelloVisitor):
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
 
-        lhs_name = self.unicode_to_str(ctx.children[0].getText())
-
+        lhs_name = self.unicode_to_str(ctx.children[0].children[0].getText())
         if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
             raise Exception('variable {} cannot be modified'.format(lhs_name))
 
