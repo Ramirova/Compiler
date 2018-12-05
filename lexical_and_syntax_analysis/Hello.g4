@@ -59,6 +59,7 @@ assignment
 
 routineCall
     : Identifier ('(' expression ( ',' expression )* ')' )?
+    | 'print' '(' expression ( ',' expression )* ')'
     ;
 
 whileLoop
@@ -163,6 +164,7 @@ Keyword
     | 'else'
     | 'not'
     | 'return'
+    | 'print'
     ;
 
 fragment Letter
