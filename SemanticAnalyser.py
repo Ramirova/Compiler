@@ -152,11 +152,18 @@ class SemanticAnalyser(HelloVisitor):
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
 
+        lhs_name = self.unicode_to_str(ctx.children[0].getText())
+
+        if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
+            raise Exception('variable {} cannot be modified'.format(lhs_name))
+
         #  checking assignment types compatibility
         if TypeTable.get_type_name(lhs_type) == 'ArrayType':
             #  if trying to assign incompatible type to an array element
             if TypeTable.table[lhs_type].nested_type_id != rhs_type:
-                raise Exception('Cannot assign {} to array with elements of type {}'.format(rhs_type, lhs_type))
+                raise Exception(
+                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(lhs_type),
+                                                                                TypeTable.get_type_name(rhs_type)))
             else:
                 return self.visitChildren(ctx)
         #  check for assignment of real to boolean
@@ -191,11 +198,13 @@ class SemanticAnalyser(HelloVisitor):
         #  constructing routine call argument list
         arguments = []
         for c in children:
-            if type(c) == HelloParser.ExpressionContext:
+            if type(c) == HelloParser.ExpressionContext and self.visitChildren(c.children[0]) is not None:
                 arguments.append(c)
 
         #  check number of arguments compatibility
-        if len(routine_parameters) != len(arguments):
+        if routine_parameters is None and len(arguments) == 0:
+            return return_type
+        elif (routine_parameters is None and len(arguments) > 0) or (len(routine_parameters) != len(arguments)):
             raise Exception("Wrong number of arguments in routine call {}".format(routine_name))
 
         #  check argument types and parameter types compatibility
@@ -228,7 +237,7 @@ class SemanticAnalyser(HelloVisitor):
 
         #  adding loop iteration variable to loops scope
         identifier = self.unicode_to_str(ctx.Identifier().getText())
-        self.current_symbol_table.add_variable(identifier, PrimitiveType.integer)
+        self.current_symbol_table.add_variable(identifier, PrimitiveType.integer, False)
 
         #  visiting for loop context children
         self.visitChildren(ctx)
@@ -449,6 +458,8 @@ class SemanticAnalyser(HelloVisitor):
         summand_type = self.visitChildren(ctx)
 
         #  if summand is an expression
+        if children is None:
+            return None
         if len(children) == 3:
             return self.visitExpression(children[1])
 

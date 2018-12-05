@@ -1,4 +1,4 @@
-# Generated from /Users/anastasia/PycharmProjects/Compiler/Hello.g4 by ANTLR 4.7
+# Generated from /Users/nicholas/PycharmProjects/Compiler/lexical_and_syntax_analysis/Hello.g4 by ANTLR 4.7
 # encoding: utf-8
 from __future__ import print_function
 from antlr4 import *
@@ -19,20 +19,20 @@ def serializedATN():
         buf.write(u"\5\6`\n\6\3\7\3\7\3\b\3\b\5\bf\n\b\3\t\3\t\7\tj\n\t\f")
         buf.write(u"\t\16\tm\13\t\3\t\3\t\3\n\3\n\3\n\3\n\3\n\3\n\3\13\3")
         buf.write(u"\13\3\13\3\13\3\13\5\13|\n\13\3\f\3\f\3\f\3\f\3\r\3\r")
-        buf.write(u"\3\r\3\r\3\r\7\r\u0087\n\r\f\r\16\r\u008a\13\r\3\r\3")
-        buf.write(u"\r\5\r\u008e\n\r\3\16\3\16\3\16\3\16\3\16\3\16\3\17\3")
-        buf.write(u"\17\3\17\3\17\5\17\u009a\n\17\3\17\3\17\3\17\3\17\3\17")
-        buf.write(u"\3\20\3\20\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\21\5")
-        buf.write(u"\21\u00ab\n\21\3\21\3\21\3\22\3\22\3\22\5\22\u00b2\n")
-        buf.write(u"\22\3\22\3\22\5\22\u00b6\n\22\3\22\3\22\3\22\3\22\5\22")
-        buf.write(u"\u00bc\n\22\3\22\3\22\5\22\u00c0\n\22\3\23\3\23\3\23")
-        buf.write(u"\3\23\7\23\u00c6\n\23\f\23\16\23\u00c9\13\23\3\23\3\23")
-        buf.write(u"\3\24\3\24\3\24\3\24\3\25\3\25\7\25\u00d3\n\25\f\25\16")
-        buf.write(u"\25\u00d6\13\25\3\26\3\26\3\26\7\26\u00db\n\26\f\26\16")
-        buf.write(u"\26\u00de\13\26\3\27\3\27\3\27\5\27\u00e3\n\27\3\30\3")
-        buf.write(u"\30\3\30\7\30\u00e8\n\30\f\30\16\30\u00eb\13\30\3\31")
-        buf.write(u"\3\31\3\31\7\31\u00f0\n\31\f\31\16\31\u00f3\13\31\3\32")
-        buf.write(u"\3\32\3\32\3\32\3\32\5\32\u00fa\n\32\3\33\3\33\5\33\u00fe")
+        buf.write(u"\3\r\3\r\3\r\7\r\u0087\n\r\f\r\16\r\u008a\13\r\5\r\u008c")
+        buf.write(u"\n\r\3\r\3\r\3\16\3\16\3\16\3\16\3\16\3\16\3\17\3\17")
+        buf.write(u"\3\17\3\17\5\17\u009a\n\17\3\17\3\17\3\17\3\17\3\17\3")
+        buf.write(u"\20\3\20\3\20\3\20\3\21\3\21\3\21\3\21\3\21\3\21\5\21")
+        buf.write(u"\u00ab\n\21\3\21\3\21\3\22\3\22\3\22\5\22\u00b2\n\22")
+        buf.write(u"\3\22\3\22\5\22\u00b6\n\22\3\22\3\22\3\22\3\22\5\22\u00bc")
+        buf.write(u"\n\22\3\22\3\22\5\22\u00c0\n\22\3\23\3\23\3\23\3\23\7")
+        buf.write(u"\23\u00c6\n\23\f\23\16\23\u00c9\13\23\3\23\3\23\3\24")
+        buf.write(u"\3\24\3\24\3\24\3\25\3\25\7\25\u00d3\n\25\f\25\16\25")
+        buf.write(u"\u00d6\13\25\3\26\3\26\3\26\7\26\u00db\n\26\f\26\16\26")
+        buf.write(u"\u00de\13\26\3\27\3\27\3\27\5\27\u00e3\n\27\3\30\3\30")
+        buf.write(u"\3\30\7\30\u00e8\n\30\f\30\16\30\u00eb\13\30\3\31\3\31")
+        buf.write(u"\3\31\7\31\u00f0\n\31\f\31\16\31\u00f3\13\31\3\32\3\32")
+        buf.write(u"\3\32\3\32\3\32\5\32\u00fa\n\32\3\33\3\33\5\33\u00fe")
         buf.write(u"\n\33\3\33\3\33\5\33\u0102\n\33\3\33\3\33\3\33\3\33\3")
         buf.write(u"\33\5\33\u0109\n\33\3\34\3\34\3\34\3\34\3\34\3\34\3\34")
         buf.write(u"\7\34\u0112\n\34\f\34\16\34\u0115\13\34\3\35\3\35\3\35")
@@ -62,14 +62,14 @@ def serializedATN():
         buf.write(u"\2tu\5\n\6\2u\23\3\2\2\2v|\5\26\f\2w|\5\30\r\2x|\5\32")
         buf.write(u"\16\2y|\5\34\17\2z|\5 \21\2{v\3\2\2\2{w\3\2\2\2{x\3\2")
         buf.write(u"\2\2{y\3\2\2\2{z\3\2\2\2|\25\3\2\2\2}~\5\66\34\2~\177")
-        buf.write(u"\7\17\2\2\177\u0080\5*\26\2\u0080\27\3\2\2\2\u0081\u008d")
-        buf.write(u"\7\61\2\2\u0082\u0083\7\20\2\2\u0083\u0088\5*\26\2\u0084")
+        buf.write(u"\7\17\2\2\177\u0080\5*\26\2\u0080\27\3\2\2\2\u0081\u0082")
+        buf.write(u"\7\61\2\2\u0082\u008b\7\20\2\2\u0083\u0088\5*\26\2\u0084")
         buf.write(u"\u0085\7\21\2\2\u0085\u0087\5*\26\2\u0086\u0084\3\2\2")
         buf.write(u"\2\u0087\u008a\3\2\2\2\u0088\u0086\3\2\2\2\u0088\u0089")
-        buf.write(u"\3\2\2\2\u0089\u008b\3\2\2\2\u008a\u0088\3\2\2\2\u008b")
-        buf.write(u"\u008c\7\22\2\2\u008c\u008e\3\2\2\2\u008d\u0082\3\2\2")
-        buf.write(u"\2\u008d\u008e\3\2\2\2\u008e\31\3\2\2\2\u008f\u0090\7")
-        buf.write(u"\23\2\2\u0090\u0091\5*\26\2\u0091\u0092\7\24\2\2\u0092")
+        buf.write(u"\3\2\2\2\u0089\u008c\3\2\2\2\u008a\u0088\3\2\2\2\u008b")
+        buf.write(u"\u0083\3\2\2\2\u008b\u008c\3\2\2\2\u008c\u008d\3\2\2")
+        buf.write(u"\2\u008d\u008e\7\22\2\2\u008e\31\3\2\2\2\u008f\u0090")
+        buf.write(u"\7\23\2\2\u0090\u0091\5*\26\2\u0091\u0092\7\24\2\2\u0092")
         buf.write(u"\u0093\5(\25\2\u0093\u0094\7\13\2\2\u0094\33\3\2\2\2")
         buf.write(u"\u0095\u0096\7\25\2\2\u0096\u0097\7\61\2\2\u0097\u0099")
         buf.write(u"\7\26\2\2\u0098\u009a\7\27\2\2\u0099\u0098\3\2\2\2\u0099")
@@ -128,7 +128,7 @@ def serializedATN():
         buf.write(u"\3\2\2\2\u0111\u010d\3\2\2\2\u0112\u0115\3\2\2\2\u0113")
         buf.write(u"\u0111\3\2\2\2\u0113\u0114\3\2\2\2\u0114\67\3\2\2\2\u0115")
         buf.write(u"\u0113\3\2\2\2\u0116\u0117\t\7\2\2\u01179\3\2\2\2 @B")
-        buf.write(u"GOU_ek{\u0088\u008d\u0099\u00aa\u00b1\u00b5\u00bb\u00bf")
+        buf.write(u"GOU_ek{\u0088\u008b\u0099\u00aa\u00b1\u00b5\u00bb\u00bf")
         buf.write(u"\u00c7\u00d2\u00d4\u00dc\u00e2\u00e9\u00f1\u00f9\u00fd")
         buf.write(u"\u0101\u0108\u0111\u0113")
         return buf.getvalue()
@@ -1063,12 +1063,12 @@ class HelloParser ( Parser ):
             self.enterOuterAlt(localctx, 1)
             self.state = 127
             self.match(HelloParser.Identifier)
-            self.state = 139
+            self.state = 128
+            self.match(HelloParser.T__13)
+            self.state = 137
             self._errHandler.sync(self)
             _la = self._input.LA(1)
-            if _la==HelloParser.T__13:
-                self.state = 128
-                self.match(HelloParser.T__13)
+            if (((_la) & ~0x3f) == 0 and ((1 << _la) & ((1 << HelloParser.T__13) | (1 << HelloParser.T__39) | (1 << HelloParser.T__40) | (1 << HelloParser.T__41) | (1 << HelloParser.T__42) | (1 << HelloParser.T__43) | (1 << HelloParser.Identifier) | (1 << HelloParser.IntegerLiteral) | (1 << HelloParser.RealLiteral))) != 0):
                 self.state = 129
                 self.expression()
                 self.state = 134
@@ -1083,10 +1083,10 @@ class HelloParser ( Parser ):
                     self._errHandler.sync(self)
                     _la = self._input.LA(1)
 
-                self.state = 137
-                self.match(HelloParser.T__15)
 
 
+            self.state = 139
+            self.match(HelloParser.T__15)
         except RecognitionException as re:
             localctx.exception = re
             self._errHandler.reportError(self, re)
