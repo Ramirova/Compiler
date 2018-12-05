@@ -170,6 +170,12 @@ class SemanticAnalyser(HelloVisitor):
         #  getting context children, routine name and return type
         children = ctx.children
         routine_name = self.unicode_to_str(ctx.Identifier().getText())
+
+        #  check if calling print
+        if routine_name == 'print':
+            self.visitChildren(ctx)
+            return
+
         return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
         routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
