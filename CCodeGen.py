@@ -159,27 +159,29 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the type declaration
         :return: the result of the visit all its children
         """
-        type = self.type_table[AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')]]
+        var_type = ctx.children[3].getText()
+        if var_type in AliasType.table:
+            var_type = self.type_table[AliasType.table[ctx.children[3].getText().encode('ascii', 'ignore')]]
         identifier = ctx.children[1].getText().encode('ascii', 'ignore')
         array_size = 0
-        if isinstance(type, ArrayType):
+        if isinstance(var_type, ArrayType) or "array" in var_type:
             array_size = self.getArraySize(ctx)
         result = ""
-        alias_name = ctx.children[3].children[0].children[0].children[4].getText().encode('ascii', 'ignore')
+        alias_type = ctx.children[2].getText().encode('ascii', 'ignore')
 
         if array_size != 0:
             array_size = "[" + str(array_size) + "]"
-            if alias_name not in AliasType.table:
-                alias_name = self.getVariableType(identifier,
+            if alias_type not in AliasType.table:
+                alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
             result = array_size
         else:
-            if alias_name not in AliasType.table:
-                alias_name = self.getVariableType(identifier,
+            if alias_type not in AliasType.table:
+                alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result + ';\n'
+        result = "typedef " + alias_type + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
         return self.visitChildren(ctx)
