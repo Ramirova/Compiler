@@ -1,3 +1,4 @@
+from collections import deque
 class TypeTable:
     """
     The table which contains all types defined in the global scope.
@@ -15,10 +16,19 @@ class TypeTable:
         pass
 
     table = {}  # Table with types
+    aux_table = deque()
 
     @staticmethod
     def add_type(type_id, type_content):
         TypeTable.table[type_id] = type_content
+
+    @staticmethod
+    def add_aux_type(type_id):
+        TypeTable.aux_table.append(type_id)
+
+    @staticmethod
+    def get_aux_type():
+        return TypeTable.aux_table.popleft()
 
     @staticmethod
     def get_type_name(type_id):
@@ -207,7 +217,3 @@ class TypeUtils:
             return True
         raise Exception("Incompatible types {} and {} for comparison. This operator can only be applied to primitive"
                         " types".format(TypeTable.get_type_name(type_id_1), TypeTable.get_type_name(type_id_2)))
-
-
-
-

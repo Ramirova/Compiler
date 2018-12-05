@@ -173,7 +173,12 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if calling print
         if routine_name == 'print':
-            self.visitChildren(ctx)
+            if len(ctx.children) > 4:
+                raise Exception('Print function can only accept one parameter')
+            type_of_inner_expression = self.visitChildren(ctx.children[2])
+            if type_of_inner_expression not in PrimitiveType.types.values():
+                raise Exception('Parameter for print can only be of primitive type')
+            TypeTable.add_aux_type(type_of_inner_expression)
             return
 
         return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
