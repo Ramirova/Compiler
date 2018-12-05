@@ -74,6 +74,7 @@ class CCodeGen(HelloVisitor):
         """
         identifier = ctx.Identifier().getText()
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
+        array_identifier = ""
         if self.record_state:
             record_scope_id = self.current_scope.scope[self.current_record].variable_type
             type_id = self.type_table[record_scope_id].inner_declarations[identifier]
@@ -81,7 +82,9 @@ class CCodeGen(HelloVisitor):
             type_id = self.current_scope.scope[identifier].variable_type
         if ctx.children[3].getText() not in AliasType.table:
             identifier_type = self.getVariableType(identifier, type_id, ctx)
-            if isinstance(self.type_table[type_id], RecordType):
+            if isinstance(self.type_table[type_id], ArrayType):
+                array_identifier = "[" + self.getArraySize(ctx) + "]"
+            elif isinstance(self.type_table[type_id], RecordType):
                 print("qq", ctx.children[3].children[0].children[0].children[1].getText())
                 self.record_state = True
                 self.current_queue = self.type_def_queue
@@ -97,8 +100,6 @@ class CCodeGen(HelloVisitor):
                     self.current_queue.append((" = {" + self.record_values[:-2] + "}").encode('ascii', 'ignore'))
                 self.current_queue.append(";\n")
                 self.record_values = ""
-                print(self.type_def_queue)
-                print(self.queue)
                 return
         else:
             identifier_type = ctx.children[3].getText()
@@ -114,11 +115,8 @@ class CCodeGen(HelloVisitor):
             if post_declaration != "":
                 self.record_values += ctx.children[5].getText() + ", "
         else:
-            if isinstance(self.type_table[type_id], ArrayType):
-                identifier += "[" + self.getArraySize(ctx) + "]"
-            declaration = identifier_type + " " + identifier + post_declaration
+            declaration = identifier_type + " " + identifier + array_identifier + post_declaration
         self.current_queue.append((declaration + ";\n").encode('ascii', 'ignore'))
-        print(self.current_queue)
         return
 
     def getVariableType(self, identifier, type_id, ctx):
@@ -130,7 +128,6 @@ class CCodeGen(HelloVisitor):
         :return: string with the name of the variable
         """
         if isinstance(self.type_table[type_id], PrimitiveType):
-            print self.primitive_type_map[type_id]
             return self.primitive_type_map[type_id]
         elif isinstance(self.type_table[type_id], ArrayType):
             return self.getVariableType(identifier, self.type_table[type_id].nested_type_id, ctx)
@@ -171,10 +168,9 @@ class CCodeGen(HelloVisitor):
                 alias_name = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result
+        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result + ';'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
-        print(self.type_def_queue)
         return self.visitChildren(ctx)
 
     def visitLang_type(self, ctx):
@@ -207,7 +203,6 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the record type
         :return: the result of the visit all its children
         """
-        print("End record declaration, go to variable declaration")
         self.record_state = True
         return self.visitChildren(ctx)
 
@@ -285,7 +280,6 @@ class CCodeGen(HelloVisitor):
         self.current_queue.append(("\nfor (int " + iterator + " = " + loop_range[0] + "; "
                                    + iterator + " < " + loop_range[1] + "; " + iterator + "++) {\n").encode('ascii',
                                                                                                             'ignore'))
-        print(ctx.getText())
         self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
         self.current_queue.append("}\n")
@@ -326,10 +320,8 @@ class CCodeGen(HelloVisitor):
         # if ctx.children[2].getText() != ":":
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        print("qww", routine_args)
         if len(routine_args) >= 1 and ctx.children[2].getText() != ":":
             for arg in routine_args:
-                print("qww2")
                 name = arg.split(":")[0]
                 type = arg.split(":")[1]
                 type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
@@ -337,7 +329,7 @@ class CCodeGen(HelloVisitor):
                 if isinstance(arg_type, PrimitiveType):
                     args += self.primitive_type_map[type_id] + " " + name + ", "
                 else:
-                    args += self.c_type_map[arg_type] + " " + name + ", "
+                    args += type + " " + name + ", "
         return_type = "void"
         print("zz", ctx.children[4].getText())
         if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
@@ -370,7 +362,6 @@ class CCodeGen(HelloVisitor):
         if len(ctx.children) >= 7 and return_index != -1:
             self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore') + ";")
         self.current_queue.append("}\n")
-        print(self.current_queue)
         return visit_children
 
     def getRoutineReturnType(self, type_id):
