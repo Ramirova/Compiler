@@ -52,12 +52,15 @@ class CCodeGen(HelloVisitor):
         SymbolTable.reset_counters()
 
     def visitProgram(self, ctx):
+        print("Starting C code generation...\n")
         """
         Method starts visiting all notes from the root to make C file.
         :param ctx: current context - the root of the program
         :return: result of the visit all its children
         """
-        return self.visitChildren(ctx)
+        children = self.visitChildren(ctx)
+        print("C code generation is done!\n")
+        return children
 
     def visitSimpleDeclaration(self, ctx):
         """
