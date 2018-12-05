@@ -49,6 +49,7 @@ class CCodeGen(HelloVisitor):
         self.record_values = "" # Variable stores the values in record that we currently translate
         self.scope_number = 0 #sequential number of subcscope in routine
         self.main_allocs = []
+        self.do_not_visit_record_declaration = False
         SymbolTable.reset_counters()
 
     def visitProgram(self, ctx):
@@ -118,7 +119,6 @@ class CCodeGen(HelloVisitor):
             if isinstance(self.type_table[type_id], ArrayType):
                 identifier += "[" + self.getArraySize(ctx) + "]"
             declaration = identifier_type + " " + identifier + "\n"
-            print(ctx.getText())
             declaration_flag = False
             declaration_index = 0
             for child_i in range(len(ctx.children)):
@@ -215,11 +215,9 @@ class CCodeGen(HelloVisitor):
                 alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        print(alias_type)
         result = "typedef " + alias_type + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
-        # print(self.record_values)
         return self.visitChildren(ctx)
 
     def visitLang_type(self, ctx):
@@ -252,6 +250,8 @@ class CCodeGen(HelloVisitor):
         :param ctx: current context - the root of the record type
         :return: the result of the visit all its children
         """
+        if self.do_not_visit_record_declaration:
+            return
         self.record_state = True
         return self.visitChildren(ctx)
 
@@ -399,12 +399,6 @@ class CCodeGen(HelloVisitor):
         # if ctx.children[2].getText() != ":":
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        print("there")
-        print(scope_parameters)
-        print(self.current_scope.scope)
-        print(TypeTable.table)
-        print(AliasType.table.values())
-        print()
         if scope_parameters is not None:
             counter = 0
             for arg in routine_args:
@@ -413,7 +407,6 @@ class CCodeGen(HelloVisitor):
                 if scope_parameters[counter] in self.primitive_type_map.keys():
                     args += self.prinf_type_map[scope_parameters[counter]] + " " + name + ", "
                 elif scope_parameters[counter] in AliasType.table.values():
-                    print("Hello")
                     c_type = ""
                     for key, value in AliasType.table.items():
                         if value == scope_parameters[counter]:
@@ -424,7 +417,6 @@ class CCodeGen(HelloVisitor):
                     if scope_parameters[counter] in TypeTable.table.keys() and isinstance(TypeTable.table[scope_parameters[counter]], ArrayType):
                         c_type += "*"
                     args += c_type + " " + name + ", "
-
                     print(args)
                 else:
                     type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
@@ -432,7 +424,7 @@ class CCodeGen(HelloVisitor):
                     if isinstance(arg_type, PrimitiveType):
                         args += self.primitive_type_map[type_id] + " " + name + ", "
                     else:
-                        type_name, inner_type = self.getRoutineReturnType(type_id)
+                        type_name, inner_type, declarations = self.getRoutineReturnType(type_id)
                         if type_name == "ArrayType":
                             args += self.c_type_map[inner_type] + "* " + name + ", "
                 counter += 1
@@ -441,7 +433,6 @@ class CCodeGen(HelloVisitor):
         if scope_return is not None:#If there are no arguments, but there is return type
             # return_type = self.c_type_map[ctx.children[3].getText()]
             return_type_id = scope_return
-            print("Hello!!")
             if return_type_id in self.prinf_type_map.keys():
                 return_type = self.prinf_type_map[return_type_id]
             if return_type_id in AliasType.table.values():
@@ -451,25 +442,15 @@ class CCodeGen(HelloVisitor):
                         return_type = key
             if return_type_id in TypeTable.table.keys():
                 if isinstance(TypeTable.table[return_type_id], RecordType):
-                    return_type = "struct " + return_type + "_type"
+                    inner_declarations = self.getRoutineReturnType(return_type_id)[2]
+                    c_inner_declarations = ""
+                    for inner_decl in inner_declarations:
+                        c_inner_declarations += inner_decl[0] + " " + self.c_type_map[inner_decl[1]] + "; "
+                    self.current_queue.append("typedef struct { " + c_inner_declarations + "} routine_return_" + str(len(self.routines)) + "\n")
+                    return_type = "struct routine_return_" + str(len(self.routines))
+                    self.do_not_visit_record_declaration = True
                 if isinstance(TypeTable.table[return_type_id], ArrayType):
                     return_type = "*" + self.c_type_map[self.getRoutineReturnType(return_type_id)[1]]
-        # if scope_return is not None and scope_parameters is not None: #If there are arguments and there is return type
-        #     raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
-        #     if raw_return_type in self.c_type_map:
-        #         return_type = self.c_type_map[raw_return_type]
-        #     elif raw_return_type in AliasType.table and isinstance(TypeTable.table[AliasType.table[raw_return_type]], ArrayType):
-        #         return_type = raw_return_type + "*"
-        #     else:
-        #         if "array" in raw_return_type:
-        #             array_return_type = raw_return_type.split("]")[1]
-        #             if array_return_type in self.c_type_map:
-        #                 return_type = self.c_type_map[array_return_type] + "*"
-        #             else:
-        #                 return_type = array_return_type + "*"
-        #         else:
-        #             return_type = raw_return_type
-
         if args is not "":
             args = args[:-2]
         routine_declaration = return_type + " " + ctx.children[1].getText() + "(" + args + ")" + " {\n"
@@ -486,16 +467,18 @@ class CCodeGen(HelloVisitor):
         return visit_children
 
     def getRoutineReturnType(self, type_id):
+        inner_declarations = []
         type_name = TypeTable.table[type_id].__class__.__name__
         if type_name == 'PrimitiveType':
-            return "PrimitiveType", PrimitiveType.type_names[type_id]
+            return "PrimitiveType", PrimitiveType.type_names[type_id], inner_declarations
         if type_name == 'ArrayType':
-            return type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
+            return type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id), inner_declarations
         if type_name == 'RecordType':
             result_string = '<' + type_name + ' with inner variables: \n{'
             for key, value in TypeTable.table[type_id].inner_declarations.items():
                 result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(value))
-            return type_name, result_string + '}>'
+                inner_declarations.append((key, TypeTable.get_type_name(value)))
+            return type_name, result_string + '}>', inner_declarations
 
     def visitParameters(self, ctx):
         """
