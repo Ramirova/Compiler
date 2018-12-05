@@ -332,37 +332,20 @@ class CCodeGen(HelloVisitor):
                 type = arg.split(":")[1]
                 type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
                 arg_type = self.type_table[type_id]
+                print(arg_type)
                 if isinstance(arg_type, PrimitiveType):
                     args += self.primitive_type_map[type_id] + " " + name + ", "
                 elif isinstance(arg_type, ArrayType):
                     args += type + " *" + name + ", "
                 else:
-                    args += type + " " + name + ", "
+                    type_name, inner_type = self.getRoutineReturnType(type_id)
+                    if type_name == "ArrayType":
+                        args += self.c_type_map[inner_type] + "* " + name + ", "
         return_type = "void"
         print("zz", ctx.children[4].getText())
         if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
-            # if isinstance(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type], PrimitiveType):
-            # return_type_id = self.current_scope.scope[ctx.children[3].getText().encode('ascii', 'ignore')].variable_type
-            # return_type = self.type_table[return_type_id]
-            # return_type = ctx.children[3].getText().encode('ascii', 'ignore').variable_type
-            # if isinstance(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type], ArrayType):
-            # return_type_id = self.current_scope.scope[ctx.children[3].getText().encode('ascii', 'ignore')].variable_type
-            #     return_type = self.type_table[return_type_id]
             return_type = self.c_type_map[ctx.children[3].getText()]
-            # return_type = self.type_table[return_type_id]
         if ":" in ctx.children[3].getText(): #If there are arguments, but there is return type
-            return_type_id = self.current_scope.scope[ctx.children[4].getText().encode('ascii', 'ignore')].variable_type
-            return_type = self.type_table[return_type_id]
-            # print(ctx.children[4].getText())
-            # print(TypeTable.get_type(self.current_scope.get_routine_info(ctx.children[1].getText()).return_type))
-            # if (isinstance(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type], RecordType)):
-            #     self.
-            #     return_type_predeclarations = "struct current_function_return_struct" + str(len(self.routines)) + self.visitRecordType(ctx.children[4])
-            #     print(return_type_predeclarations)
-            # print(TypeTable.table[self.current_scope.get_routine_info(ctx.children[1].getText()).return_type])
-            # type = self.getRoutineReturnType(self.current_scope.get_routine_info(ctx.children[1].getText()).return_type)
-            # # print(self.current_scope.get_routine_info(ctx.children[1].getText()))
-            # print(type)
             return_type = self.c_type_map[ctx.children[4].getText()]
 
         if args is not "":
