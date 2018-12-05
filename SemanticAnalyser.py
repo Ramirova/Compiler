@@ -4,16 +4,15 @@ from lexical_and_syntax_analysis.HelloParser import HelloParser
 from TypeTable import *
 import unicodedata
 
-"""
-The class that performs semantic analysis of a program tree. Uses instances of a 'Symbol table' to define scopes of 
-internal structures (variables, routines, loops and if-statements), and a 'Type table' to keep track of types
-- primitive as well as user-defined. 
-
-"""
-
 
 class SemanticAnalyser(HelloVisitor):
-    """Global variables"""
+    """
+    The class that performs semantic analysis of a program tree. Uses instances of a 'Symbol table' to define scopes of
+    internal structures (variables, routines, loops and if-statements), and a 'Type table' to keep track of types
+    - primitive as well as user-defined.
+
+    """
+
     current_symbol_table = SymbolTable(parent=None)
     type_table = TypeTable
     type_table.table[1] = PrimitiveType()

@@ -1,5 +1,6 @@
 import copy
 
+
 class SymbolTable:
     """
     This class represents symbol table. It supports supports a hierarchy of tables, that correspond to
