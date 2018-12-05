@@ -160,10 +160,10 @@ class SemanticAnalyser(HelloVisitor):
         if TypeTable.get_type(self.current_symbol_table.get_variable_info(lhs_name).variable_type).__class__.__name__\
                 == 'ArrayType':
             #  if trying to assign incompatible type to an array element
-            if TypeTable.table[lhs_type].nested_type_id != rhs_type:
+            if lhs_type != rhs_type:
                 raise Exception(
-                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(lhs_type),
-                                                                                TypeTable.get_type_name(rhs_type)))
+                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(rhs_type),
+                                                                                TypeTable.get_type_name(lhs_type)))
             else:
                 return self.visitChildren(ctx)
         #  check for assignment of real to boolean
