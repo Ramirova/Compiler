@@ -167,7 +167,7 @@ class CCodeGen(HelloVisitor):
         if isinstance(var_type, ArrayType) or "array" in var_type:
             array_size = self.getArraySize(ctx)
         result = ""
-        alias_type = ctx.children[2].getText().encode('ascii', 'ignore')
+        alias_type = ctx.children[3].getText().encode('ascii', 'ignore')
 
         if array_size != 0:
             array_size = "[" + str(array_size) + "]"
@@ -181,6 +181,7 @@ class CCodeGen(HelloVisitor):
                 alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
+        print(alias_type)
         result = "typedef " + alias_type + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
