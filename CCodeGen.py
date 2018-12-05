@@ -335,7 +335,7 @@ class CCodeGen(HelloVisitor):
                 else:
                     type_name, inner_type = self.getRoutineReturnType(type_id)
                     if type_name == "ArrayType":
-                        args += self.c_type_map[inner_type] + "[] " + name + ", "
+                        args += self.c_type_map[inner_type] + "* " + name + ", "
         return_type = "void"
         print("zz", ctx.children[4].getText())
         if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
