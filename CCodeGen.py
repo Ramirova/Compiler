@@ -85,7 +85,6 @@ class CCodeGen(HelloVisitor):
             if isinstance(self.type_table[type_id], ArrayType):
                 array_identifier = "[" + self.getArraySize(ctx) + "]"
             elif isinstance(self.type_table[type_id], RecordType):
-                print("qq", ctx.children[3].children[0].children[0].children[1].getText())
                 self.record_state = True
                 self.current_queue = self.type_def_queue
                 self.current_record = identifier
@@ -115,7 +114,11 @@ class CCodeGen(HelloVisitor):
             if post_declaration != "":
                 self.record_values += ctx.children[5].getText() + ", "
         else:
-            declaration = identifier_type + " " + identifier + array_identifier + post_declaration
+            if array_identifier != "":
+                declaration = identifier_type + " " + identifier + "_array_to_point" + array_identifier + post_declaration + ';\n'
+                declaration += identifier_type + "* " + identifier + " = " + identifier + "_array_to_point"
+            else:
+                declaration = identifier_type + " " + identifier + post_declaration
         self.current_queue.append((declaration + ";\n").encode('ascii', 'ignore'))
         return
 
@@ -330,6 +333,8 @@ class CCodeGen(HelloVisitor):
                 arg_type = self.type_table[type_id]
                 if isinstance(arg_type, PrimitiveType):
                     args += self.primitive_type_map[type_id] + " " + name + ", "
+                elif isinstance(arg_type, ArrayType):
+                    args += type + " *" + name + ", "
                 else:
                     args += type + " " + name + ", "
         return_type = "void"
