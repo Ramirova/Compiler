@@ -1,4 +1,4 @@
-# Generated from /Users/anastasia/PycharmProjects/Compiler/Hello.g4 by ANTLR 4.7
+# Generated from /Users/nicholas/PycharmProjects/Compiler/lexical_and_syntax_analysis/Hello.g4 by ANTLR 4.7
 # encoding: utf-8
 from __future__ import print_function
 from antlr4 import *
