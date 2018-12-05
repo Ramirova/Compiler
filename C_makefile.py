@@ -23,7 +23,7 @@ class C_makefile:
         :return:
         """
         file = open("c_file.c", "w+")
-        file.write("#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n#include<stdlib.h>\n")
+        file.write("#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n#include <stdlib.h>\n")
 
         for typedef in self.typedef_queue:
             file.write(typedef)
@@ -61,7 +61,7 @@ class C_makefile:
                 else:
                     main += "("
                     for j in range(len(parameters)):
-                        main += self.get_param_type(parameters[j]) + "argv[" + str(j + 2) + "], "
+                        main += self.get_param_type(parameters[j]) + "argv[" + str(j + 2) + "]), "
                     main = main[:-2]
                     main += ");\n"
                 main += "}\n"
@@ -70,9 +70,9 @@ class C_makefile:
 
     def get_param_type(self, type_id):
         if type_id == 1:
-            return "(int) "
+            return "atoi("
         elif type_id == 2:
-            return "(double) "
+            return "atof("
         elif type_id == 3:
-            return "(bool) "
+            return "atoi("
         return ""
