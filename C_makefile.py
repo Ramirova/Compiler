@@ -50,7 +50,7 @@ class C_makefile:
         # main += "const char *routines[" + len(self.routines) + "] = { "
         for i in range(len(self.routines)):
             parameters = SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters
-            if len(filter(lambda x: (x < 0 or x > 3), parameters)) == 0:
+            if parameters is None or len(filter(lambda x: (x < 0 or x > 3), parameters)) == 0:
                 main += "if (strcmp(argv[1], \"" + self.routines[i] + "\") > 0) {\n"
                 main += self.routines[i]
                 if parameters is None:
