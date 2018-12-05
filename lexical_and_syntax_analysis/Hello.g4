@@ -1,4 +1,3 @@
-// Define a grammar called Hello
 grammar Hello;
 // GRAMMAR FOR I LANGUAGE
 
@@ -58,8 +57,7 @@ assignment
     ;
 
 routineCall
-    : Identifier ('(' expression ( ',' expression )* ')' )?
-    | 'print' '(' expression ( ',' expression )* ')'
+    : Identifier '(' (expression ( ',' expression )*)? ')'
     ;
 
 whileLoop
@@ -164,7 +162,6 @@ Keyword
     | 'else'
     | 'not'
     | 'return'
-    | 'print'
     ;
 
 fragment Letter
