@@ -96,7 +96,7 @@ class CCodeGen(HelloVisitor):
                 self.visitChildren(ctx.children[3])
                 self.record_state = False
                 self.current_record = ""
-                self.current_queue.append(("} " + identifier + "_type" + ";").encode('ascii', 'ignore'))
+                self.current_queue.append(("} " + identifier + "_type" + ";\n").encode('ascii', 'ignore'))
                 self.current_queue = self.queue
                 self.current_queue.append(identifier + "_type " + identifier + "")
                 if self.record_values != "":
@@ -179,7 +179,7 @@ class CCodeGen(HelloVisitor):
                 alias_name = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
-        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result + ';'
+        result = "typedef " + alias_name + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
         return self.visitChildren(ctx)
@@ -240,7 +240,7 @@ class CCodeGen(HelloVisitor):
         :return: the result of the visit all its children
         """
         self.current_queue.append(
-            (ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";").encode('ascii', 'ignore'))
+            (ctx.children[0].getText() + " = " + ctx.children[2].getText() + ";\n").encode('ascii', 'ignore'))
         return self.visitChildren(ctx)
 
     def visitRoutineCall(self, ctx):
@@ -264,7 +264,7 @@ class CCodeGen(HelloVisitor):
             else:
                 self.current_queue.append(");\n")
             return
-        self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";")
+        self.current_queue.append(ctx.getText().encode('ascii', 'ignore') + ";\n")
         return self.visitChildren(ctx)
 
     def visitWhileLoop(self, ctx):
@@ -373,7 +373,7 @@ class CCodeGen(HelloVisitor):
             if ctx.children[child].getText() == "return":
                 return_index = child
         if len(ctx.children) >= 7 and return_index != -1:
-            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore') + ";")
+            self.current_queue.append(("return " + ctx.children[return_index + 1].getText()).encode('ascii', 'ignore') + ";\n")
         self.current_queue.append("}\n")
         return visit_children
 

@@ -48,13 +48,13 @@ class C_makefile:
         main += "int main (int argc, char *argv[]) {\n"
         for alloc in self.alloc_queue:
             main += alloc
-        main += "if (argc > 1) {\n"
+        main += "    if (argc > 1) {\n"
 
         # main += "const char *routines[" + len(self.routines) + "] = { "
         for i in range(len(self.routines)):
             parameters = SymbolTable.root_table.get_routine_info(routine_name=self.routines[i]).parameters
             if parameters is None or len(filter(lambda x: (x < 0 or x > 3), parameters)) == 0:
-                main += "if (strcmp(argv[1], \"" + self.routines[i] + "\") == 0) {\n"
+                main += "        if (strcmp(argv[1], \"" + self.routines[i] + "\") == 0) {\n            "
                 main += self.routines[i]
                 if parameters is None:
                     main += '();\n'
@@ -64,8 +64,8 @@ class C_makefile:
                         main += self.get_param_type(parameters[j]) + "argv[" + str(j + 2) + "]), "
                     main = main[:-2]
                     main += ");\n"
-                main += "}\n"
-        main += "\n}\n}"
+                main += "        }\n"
+        main += "    }\n}"
         return main
 
     def get_param_type(self, type_id):
