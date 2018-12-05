@@ -151,7 +151,7 @@ class CCodeGen(HelloVisitor):
         :param ctx: root of the current declaration
         :return: number which is the size of the array
         """
-        return self.expressionToString(ctx.getText().split('[')[1].split(']')[0])
+        return "(" + self.expressionToString(ctx.getText().split('[')[1].split(']')[0]) + "+1)"
 
     def visitTypeDeclaration(self, ctx):
         """
@@ -289,10 +289,21 @@ class CCodeGen(HelloVisitor):
         """
         self.current_scope = self.current_scope.child_scopes[self.current_scope.get_new_inner_scope_name()]
         self.number_of_loops += 1
+        offset = 0
+        if ctx.children[3].getText() == "reverse":
+            offset = 1
         iterator = ctx.children[1].getText()
-        loop_range = ctx.children[3].getText().split("..")
+        loop_range = ctx.children[3 + offset].getText().split("..")
+        sign = ""
+        iteration = ""
+        if offset == 1:
+            sign = " >= "
+            iteration = "--"
+        else:
+            sign = " <= "
+            iteration = "++"
         self.current_queue.append(("\nfor (int " + iterator + " = " + loop_range[0] + "; "
-                                   + iterator + " < " + loop_range[1] + "; " + iterator + "++) {\n").encode('ascii',
+                                   + iterator + sign + loop_range[1] + "; " + iterator + iteration + ") {\n").encode('ascii',
                                                                                                             'ignore'))
         self.visitChildren(ctx)
         self.current_scope = self.current_scope.parent_scope
