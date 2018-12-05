@@ -4,5 +4,6 @@
 
 int bubble_sort() {
 int b;
+printf ("int, );
 return b;}
 

@@ -1,4 +1,5 @@
 routine bubble_sort: integer is
     var b : integer
+    print(1+1)
     return b
 end;

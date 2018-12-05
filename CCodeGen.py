@@ -240,12 +240,13 @@ class CCodeGen(HelloVisitor):
         """
         routine_name = ctx.Identifier().getText().encode('ascii', 'ignore')
         if routine_name == 'print':
-            semantic_analyser = SemanticAnalyser()
-            type = self.prinf_type_map[semantic_analyser.visitExpression(ctx.expression())]
+            type = self.primitive_type_map[TypeTable.get_aux_type()]
+            # semantic_analyser = SemanticAnalyser()
+            # type = self.prinf_type_map[semantic_analyser.visitExpression(ctx.expression())]
             self.current_queue.append("printf (\"" + type + ", ")
             if type == 3:
                 self.current_queue.append("bool_hadler(")
-            self.visitChildren()
+            self.visitChildren(ctx)
             if type == 3:
                 self.current_queue.append("));\n")
             else:
