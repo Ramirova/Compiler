@@ -402,26 +402,46 @@ class CCodeGen(HelloVisitor):
         print("there")
         print(scope_parameters)
         print(self.current_scope.scope)
-        print(AliasType.table)
+        print(TypeTable.table)
+        print(AliasType.table.values())
         print()
         if scope_parameters is not None:
-            # for arg in scope_parameters:
-            #     if arg in self.prinf_type_map.keys()
+            counter = 0
             for arg in routine_args:
                 name = arg.split(":")[0]
-                type = arg.split(":")[1]
-                type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
-                arg_type = self.type_table[type_id]
-                if isinstance(arg_type, PrimitiveType):
-                    args += self.primitive_type_map[type_id] + " " + name + ", "
+                type = ""
+                if scope_parameters[counter] in self.primitive_type_map.keys():
+                    args += self.prinf_type_map[scope_parameters[counter]] + " " + name + ", "
+                elif scope_parameters[counter] in AliasType.table.values():
+                    print("Hello")
+                    c_type = ""
+                    for key, value in AliasType.table.items():
+                        if value == scope_parameters[counter]:
+                            c_type = key
+                    print(scope_parameters[counter])
+                    if scope_parameters[counter] in TypeTable.table.keys() and isinstance(TypeTable.table[scope_parameters[counter]], RecordType):
+                        c_type += "_type"
+                    if scope_parameters[counter] in TypeTable.table.keys() and isinstance(TypeTable.table[scope_parameters[counter]], ArrayType):
+                        c_type += "*"
+                    args += c_type + " " + name + ", "
+
+                    print(args)
                 else:
-                    type_name, inner_type = self.getRoutineReturnType(type_id)
-                    if type_name == "ArrayType":
-                        args += self.c_type_map[inner_type] + "* " + name + ", "
+                    type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
+                    arg_type = self.type_table[type_id]
+                    if isinstance(arg_type, PrimitiveType):
+                        args += self.primitive_type_map[type_id] + " " + name + ", "
+                    else:
+                        type_name, inner_type = self.getRoutineReturnType(type_id)
+                        if type_name == "ArrayType":
+                            args += self.c_type_map[inner_type] + "* " + name + ", "
+                counter += 1
+
         return_type = "void"
         if scope_return is not None:#If there are no arguments, but there is return type
             # return_type = self.c_type_map[ctx.children[3].getText()]
             return_type_id = scope_return
+            print("Hello!!")
             if return_type_id in self.prinf_type_map.keys():
                 return_type = self.prinf_type_map[return_type_id]
             if return_type_id in AliasType.table.values():
@@ -429,10 +449,11 @@ class CCodeGen(HelloVisitor):
                 for key, value in AliasType.table.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
                     if value == return_type_id:
                         return_type = key
+            if return_type_id in TypeTable.table.keys():
                 if isinstance(TypeTable.table[return_type_id], RecordType):
-                    return_type = "struct " + return_type
+                    return_type = "struct " + return_type + "_type"
                 if isinstance(TypeTable.table[return_type_id], ArrayType):
-                    return_type = "*" + return_type
+                    return_type = "*" + self.c_type_map[self.getRoutineReturnType(return_type_id)[1]]
         # if scope_return is not None and scope_parameters is not None: #If there are arguments and there is return type
         #     raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
         #     if raw_return_type in self.c_type_map:

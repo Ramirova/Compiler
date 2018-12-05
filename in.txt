@@ -1,12 +1,12 @@
 type my_rec is record var i is 0 end;
 type my_arr is array[3] integer;
-routine a(rec: my_rec): array[3] integer is
+routine a(rec: my_arr): my_arr is
     var result : array[3] integer
     return result
     end;
 
 var input : my_rec;
-var in_arr : my_arr;
-var result is a(input);
+var in_arr : array[3] integer;
+var result is a(in_arr);
 
 
