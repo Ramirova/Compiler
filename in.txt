@@ -1,6 +1,12 @@
+type my_rec is record var i is 0 end;
+type my_arr is array[3] integer;
+routine a(rec: my_rec): array[3] integer is
+    var result : array[3] integer
+    return result
+    end;
 
-routine bubble_sort(arg : array[2] integer): integer is
-    var b : integer
-    print(1+1)
-    return b
-end;
+var input : my_rec;
+var in_arr : my_arr;
+var result is a(input);
+
+

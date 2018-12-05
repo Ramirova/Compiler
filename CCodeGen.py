@@ -80,7 +80,10 @@ class CCodeGen(HelloVisitor):
         identifier = unicodedata.normalize('NFKD', identifier).encode('ascii', 'ignore')
         array_identifier = ""
         if self.record_state:
-            record_scope_id = self.current_scope.scope[self.current_record].variable_type
+            if self.current_record in self.current_scope.scope.keys():
+                record_scope_id = self.current_scope.scope[self.current_record].variable_type
+            if self.current_record in AliasType.table.keys():
+                record_scope_id = AliasType.table[self.current_record]
             type_id = self.type_table[record_scope_id].inner_declarations[identifier]
         else:
             type_id = self.current_scope.scope[identifier].variable_type
@@ -115,8 +118,15 @@ class CCodeGen(HelloVisitor):
             if isinstance(self.type_table[type_id], ArrayType):
                 identifier += "[" + self.getArraySize(ctx) + "]"
             declaration = identifier_type + " " + identifier + "\n"
-            if post_declaration != "" and len(ctx.children) > 4:
-                self.record_values += ctx.children[5].getText() + ", "
+            print(ctx.getText())
+            declaration_flag = False
+            declaration_index = 0
+            for child_i in range(len(ctx.children)):
+                if ctx.children[child_i].getText() == "is" and child_i + 1 < len(ctx.children):
+                    declaration_flag = True
+                    declaration_index = child_i + 1
+            if post_declaration != "" and declaration_flag:
+                self.record_values += ctx.children[declaration_index].getText() + ", "
         else:
             if array_identifier != "":
                 declaration = identifier_type + "* " + identifier + post_declaration
@@ -151,7 +161,11 @@ class CCodeGen(HelloVisitor):
         :param ctx: root of the current declaration
         :return: number which is the size of the array
         """
-        return "(" + self.expressionToString(ctx.getText().split('[')[1].split(']')[0]) + "+1)"
+
+        if "[" in ctx.getText():
+            return "(" + self.expressionToString(ctx.getText().split('[')[1].split(']')[0]) + "+1)"
+        else:
+            return ""
 
     def visitTypeDeclaration(self, ctx):
         """
@@ -164,10 +178,29 @@ class CCodeGen(HelloVisitor):
             var_type = self.type_table[AliasType.table[ctx.children[3].getText().encode('ascii', 'ignore')]]
         identifier = ctx.children[1].getText().encode('ascii', 'ignore')
         array_size = 0
-        if isinstance(var_type, ArrayType) or "array" in var_type:
+        type_id = AliasType.table[identifier]
+        if type_id in self.type_table.keys() and isinstance(self.type_table[type_id], ArrayType):
             array_size = self.getArraySize(ctx)
+        if type_id in self.type_table.keys() and isinstance(self.type_table[type_id], RecordType):
+            self.current_record = identifier
+            self.record_state = True
+            self.current_queue = self.type_def_queue
+            self.current_record = identifier
+            self.current_queue.append(("typedef struct {\n").encode('ascii', 'ignore'))
+            self.visitChildren(ctx.children[3])
+            self.record_state = False
+            self.current_record = ""
+            self.current_queue.append(("} " + identifier + "_type" + ";\n").encode('ascii', 'ignore'))
+            self.current_queue = self.queue
+            self.current_queue.append(identifier + "_type " + identifier + "")
+            if self.record_values != "":
+                self.current_queue.append((" = {" + self.record_values[:-2] + "}").encode('ascii', 'ignore'))
+            self.current_queue.append(";\n")
+            self.record_values = ""
+            return
+
         result = ""
-        alias_type = ctx.children[3].getText().encode('ascii', 'ignore')
+        alias_type = ctx.children[1].getText().encode('ascii', 'ignore')
 
         if array_size != 0:
             array_size = "[" + str(array_size) + "]"
@@ -181,9 +214,11 @@ class CCodeGen(HelloVisitor):
                 alias_type = self.getVariableType(identifier,
                                                   AliasType.table[ctx.children[1].getText().encode('ascii', 'ignore')],
                                                   ctx.children[3])
+        print(alias_type)
         result = "typedef " + alias_type + " " + ctx.children[1].getText() + result + ';\n'
         self.type_def_queue.append(result.encode('ascii', 'ignore'))
         self.alias_list.append(identifier)
+        # print(self.record_values)
         return self.visitChildren(ctx)
 
     def visitLang_type(self, ctx):
@@ -353,12 +388,23 @@ class CCodeGen(HelloVisitor):
         """
         self.current_scope = self.current_scope.child_scopes[ctx.children[1].getText()]
         self.routines.append(ctx.children[1].getText().encode('ascii', 'ignore'))
+        scope_parameters = self.current_scope.root_table.routines[
+            ctx.children[1].getText().encode('ascii', 'ignore')].parameters
+        scope_return = self.current_scope.root_table.routines[
+            ctx.children[1].getText().encode('ascii', 'ignore')].return_type
         return_type_predeclarations = ""
         routine_args = ""
         # if ctx.children[2].getText() != ":":
         routine_args = ctx.children[2].getText().replace('(', "").replace(')', "").split(",")
         args = ""
-        if len(routine_args) >= 1 and routine_args[0] != "is" and ctx.children[2].getText() != ":":
+        print("there")
+        print(scope_parameters)
+        print(self.current_scope.scope)
+        print(AliasType.table)
+        print()
+        if scope_parameters is not None:
+            # for arg in scope_parameters:
+            #     if arg in self.prinf_type_map.keys()
             for arg in routine_args:
                 name = arg.split(":")[0]
                 type = arg.split(":")[1]
@@ -371,23 +417,35 @@ class CCodeGen(HelloVisitor):
                     if type_name == "ArrayType":
                         args += self.c_type_map[inner_type] + "* " + name + ", "
         return_type = "void"
-        if ":" in routine_args and len(routine_args) == 1:#If there are no arguments, but there is return type
-            return_type = self.c_type_map[ctx.children[3].getText()]
-        if ":" in ctx.children[3].getText() and "is" not in ctx.children[2].getText(): #If there are arguments, but there is return type
-            raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
-            if raw_return_type in self.c_type_map:
-                return_type = self.c_type_map[raw_return_type]
-            elif raw_return_type in AliasType.table and isinstance(TypeTable.table[AliasType.table[raw_return_type]], ArrayType):
-                return_type = raw_return_type + "*"
-            else:
-                if "array" in raw_return_type:
-                    array_return_type = raw_return_type.split("]")[1]
-                    if array_return_type in self.c_type_map:
-                        return_type = self.c_type_map[array_return_type] + "*"
-                    else:
-                        return_type = array_return_type + "*"
-                else:
-                    return_type = raw_return_type
+        if scope_return is not None:#If there are no arguments, but there is return type
+            # return_type = self.c_type_map[ctx.children[3].getText()]
+            return_type_id = scope_return
+            if return_type_id in self.prinf_type_map.keys():
+                return_type = self.prinf_type_map[return_type_id]
+            if return_type_id in AliasType.table.values():
+                print(AliasType.table)
+                for key, value in AliasType.table.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
+                    if value == return_type_id:
+                        return_type = key
+                if isinstance(TypeTable.table[return_type_id], RecordType):
+                    return_type = "struct " + return_type
+                if isinstance(TypeTable.table[return_type_id], ArrayType):
+                    return_type = "*" + return_type
+        # if scope_return is not None and scope_parameters is not None: #If there are arguments and there is return type
+        #     raw_return_type = ctx.children[4].getText().encode('ascii', 'ignore')
+        #     if raw_return_type in self.c_type_map:
+        #         return_type = self.c_type_map[raw_return_type]
+        #     elif raw_return_type in AliasType.table and isinstance(TypeTable.table[AliasType.table[raw_return_type]], ArrayType):
+        #         return_type = raw_return_type + "*"
+        #     else:
+        #         if "array" in raw_return_type:
+        #             array_return_type = raw_return_type.split("]")[1]
+        #             if array_return_type in self.c_type_map:
+        #                 return_type = self.c_type_map[array_return_type] + "*"
+        #             else:
+        #                 return_type = array_return_type + "*"
+        #         else:
+        #             return_type = raw_return_type
 
         if args is not "":
             args = args[:-2]
@@ -407,14 +465,14 @@ class CCodeGen(HelloVisitor):
     def getRoutineReturnType(self, type_id):
         type_name = TypeTable.table[type_id].__class__.__name__
         if type_name == 'PrimitiveType':
-            return '{}'.format(PrimitiveType.type_names[type_id])
+            return "PrimitiveType", PrimitiveType.type_names[type_id]
         if type_name == 'ArrayType':
             return type_name, TypeTable.get_type_name(TypeTable.table[type_id].nested_type_id)
         if type_name == 'RecordType':
             result_string = '<' + type_name + ' with inner variables: \n{'
             for key, value in TypeTable.table[type_id].inner_declarations.items():
                 result_string += '{}: {} \n'.format(key, TypeTable.get_type_name(value))
-            return result_string + '}>'
+            return type_name, result_string + '}>'
 
     def visitParameters(self, ctx):
         """
