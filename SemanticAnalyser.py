@@ -176,7 +176,7 @@ class SemanticAnalyser(HelloVisitor):
         if TypeTable.get_type(self.current_symbol_table.get_variable_info(lhs_name).variable_type).__class__.__name__\
                 == 'ArrayType':
             #  if trying to assign incompatible type to an array element
-            if TypeTable.table[lhs_type].nested_type_id != rhs_type:
+            if lhs_type != rhs_type:
                 line = ctx.start.line
                 self.warning_counter += 1
                 print '\033[91m' + 'Cannot assign {} to array with elements of type {}, line {}'.format(
