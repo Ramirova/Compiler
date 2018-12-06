@@ -25,7 +25,7 @@ class SymbolTable:
         :return: object of type SymbolTableEntry containing information about the requested variable
         """
         if self.parent_scope is None and not self.is_defined_in_scope(variable_name):
-            raise Exception('there is no {} variable defined'.format(variable_name))
+            print '\033[91m' + 'there is no {} variable defined'.format(variable_name) + '\033[0m'
         if variable_name in self.scope.keys():
             return self.scope[variable_name]
         else:
@@ -37,7 +37,7 @@ class SymbolTable:
         :return: object of type RoutineTableEntry containing information about the requested routine
         """
         if self.parent_scope is None and not self.routine_defined_in_scope(routine_name):
-            raise Exception('there is no {} routine defined'.format(routine_name))
+            print '\033[91m' + 'there is no {} routine defined'.format(routine_name) + '\033[0m'
         if self.routine_defined_in_scope(routine_name):
             return SymbolTable.root_table.routines[routine_name]
 
@@ -59,7 +59,7 @@ class SymbolTable:
         :param return_type:
         """
         if not self.is_root_table():
-            raise Exception('Routines can only be added to the global scope, i.e. to the root table')
+            print '\033[91m' + 'Routines can only be added to the global scope, i.e. to the root table' + '\033[0m'
         self.routines[routine_name] = RoutineTableEntry(routine_name, parameters, return_type)
 
     def remove(self, variable_name):
@@ -136,8 +136,8 @@ class SymbolTable:
         :return: a new name for the next inner scope of the current scope
         """
         if self.parent_scope is None:
-            raise Exception("While, for and if cannot be used in the global scope. Cannot create a general"
-                            "inner scope for global scope, only one for a routine")
+            print '\033[91m' + 'While, for and if cannot be used in the global scope. Cannot create a general inner scope for global scope, only one for a routine' + '\033[0m'
+
         self.routine_inner_scopes_counter += 1
         return "{}{}".format(SymbolTable.inner_scope_name, self.routine_inner_scopes_counter)
 
@@ -167,6 +167,7 @@ class SymbolTableEntry:
     """
     Represents a single tale entry in a symbol table
     """
+
     def __init__(self, variable_type, variable_name, modifiable):
         """
         :param variable_type: id of the type
@@ -181,6 +182,7 @@ class RoutineTableEntry:
     """
     Represents a single table entry in the routine table
     """
+
     def __init__(self, name, parameters, return_type):
         """
         :param name:

@@ -16,7 +16,7 @@ class TypeTable:
         pass
 
     table = {}  # Table with types
-    aux_table = deque()
+    aux_table = deque()  # expression types are saved here
 
     @staticmethod
     def add_type(type_id, type_content):
