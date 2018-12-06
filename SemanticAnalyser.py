@@ -51,7 +51,7 @@ class SemanticAnalyser(HelloVisitor):
         final_type = lang_type
 
         #  check if the variable was already defined in the current scope
-        if self.current_symbol_table.is_defined_in_current_scope(identifier):
+        if self.current_symbol_table.is_defined_in_local_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
 
         #  deduce type from expression if no explicit type was specified
