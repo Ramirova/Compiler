@@ -509,6 +509,9 @@ class SemanticAnalyser(HelloVisitor):
             #  check if array was declared
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
+            # check that the expression in the subscript is integer
+            if not self.visitExpression(children[2]) == PrimitiveType.integer:
+                raise Exception('Elements of array can only be accessed with integer indexes')
             #  return type of the array from the symbol table
             return TypeTable.get_type(
                 self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
