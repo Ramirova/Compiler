@@ -1,44 +1,32 @@
-routine partition(A : array[3] integer, lo : integer, hi : integer): integer is
-    var pivot is A[hi]
-    var i is lo
-    var j is 0
-    for j in lo..(hi - 1) loop
-        if A[j] <= pivot then
-        	var temp is A[j]
-        	A[j] := A[i]
-        	A[i] := A[j]
-            i := i + 1
-            end
-        end
-    var temp is A[i]
-	A[j] := A[hi]
-	A[hi] := A[i]
-    return i
-    end;
+var arr : array[5] integer;
 
-routine quicksort(A : array[3] integer, lo : integer, hi : integer): array[3] integer is
-    if lo < hi then
-        var p : integer
-        p := partition(A, lo, hi)
-        quicksort(A, lo, (p - 1))
-        quicksort(A, (p + 1), hi)
-    end
-    return A
-    end;
+
+routine insertion_sort(a : array[5] integer) is
+    var start_loop : integer is 1
+    var end_loop : integer is 5
+    for i in start_loop..end_loop loop
+        var x is a[i]
+        var j is i
+            while j > 1 and a[j - 1] > x loop
+                a[j] := a[j - 1]
+                j := j - 1
+            end
+        a[j] := x
+     end
+end;
 
 
 routine init_and_start(e1 : integer, e2: integer, e3: integer, e4: integer, e5: integer) is
-    var a : array[5] integer
-    a[1] := e1
-    a[2] := e2
-    a[3] := e3
-    a[4] := e4
-    a[5] := e5
-    quicksort(a, 1, 5)
-    print(a[1])
-    print(a[2])
-    print(a[3])
-    print(a[4])
-    print(a[5])
+    arr[1] := e1
+    arr[2] := e2
+    arr[3] := e3
+    arr[4] := e4
+    arr[5] := e5
+    insertion_sort(arr)
+    print(arr[1])
+    print(arr[2])
+    print(arr[3])
+    print(arr[4])
+    print(arr[5])
     end;
 
