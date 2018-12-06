@@ -1,3 +1,6 @@
+import sys
+import warnings
+
 from lexical_and_syntax_analysis.HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
 from lexical_and_syntax_analysis.HelloParser import HelloParser
@@ -18,6 +21,7 @@ class SemanticAnalyser(HelloVisitor):
     type_table.table[1] = PrimitiveType()
     type_table.table[2] = PrimitiveType()
     type_table.table[3] = PrimitiveType()
+    warning_counter = 0
 
     @staticmethod
     def unicode_to_str(unicode_str):
@@ -29,7 +33,10 @@ class SemanticAnalyser(HelloVisitor):
         return unicodedata.normalize('NFKD', unicode_str).encode('ascii', 'ignore')
 
     def visitProgram(self, ctx):
-        return self.visitChildren(ctx)
+        self.visitChildren(ctx)
+        if self.warning_counter > 0:
+            sys.exit()
+        return
 
     # Visit a parse tree produced by HelloParser#simpleDeclaration.
     def visitSimpleDeclaration(self, ctx):
@@ -52,7 +59,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if the variable was already defined in the current scope
         if self.current_symbol_table.is_defined_in_current_scope(identifier):
-            raise Exception('Variable {} is already defined'.format(identifier))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Variable {} is already defined at line {}'.format(identifier, line) + '\033[0m'
 
         #  deduce type from expression if no explicit type was specified
         if lang_type is None:  # 'var' Identifier 'is' expression
@@ -61,7 +70,10 @@ class SemanticAnalyser(HelloVisitor):
         elif lang_type is not None and expression is not None:  # 'var' Identifier ':' lang_type 'is' expression
             expression_type = self.visitExpression(expression)
             if lang_type != expression_type:
-                raise Exception('Incompatible types in variable declaration {} '.format(identifier))
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Incompatible types in variable declaration {} at line {}'.format(identifier,
+                                                                                                     line) + '\033[0m'
 
         #  add variable to the symbol table
         self.current_symbol_table.add_variable(identifier, final_type)
@@ -137,7 +149,9 @@ class SemanticAnalyser(HelloVisitor):
         #  check type in case the size of the array is defined with expression
         expression = ctx.children[2]
         if self.visitExpression(expression) != PrimitiveType.integer:
-            raise Exception('Array size can only be integer')
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Array size can only be integer, line {}'.format(line) + '\033[0m'
         return new_type.get_id()
 
     # Visit a parse tree produced by HelloParser#statement.
@@ -155,22 +169,28 @@ class SemanticAnalyser(HelloVisitor):
         lhs_name = self.unicode_to_str(ctx.children[0].getText())
 
         if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
-            raise Exception('variable {} cannot be modified'.format(lhs_name))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Variable {} cannot be modified, line {}'.format(lhs_name, line) + '\033[0m'
 
         #  checking assignment types compatibility
         if TypeTable.get_type_name(lhs_type) == 'ArrayType':
             #  if trying to assign incompatible type to an array element
             if TypeTable.table[lhs_type].nested_type_id != rhs_type:
-                raise Exception(
-                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(lhs_type),
-                                                                                TypeTable.get_type_name(rhs_type)))
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Cannot assign {} to array with elements of type {}, line {}'.format(
+                    TypeTable.get_type_name(lhs_type),
+                    TypeTable.get_type_name(rhs_type), line) + '\033[0m'
             else:
                 return self.visitChildren(ctx)
         #  check for assignment of real to boolean
         elif not TypeUtils.are_compatible_for_assignment(lhs_type, rhs_type):
-            raise Exception(
-                'Types {} and {} are not compatible for assignment'.format(TypeTable.get_type_name(lhs_type),
-                                                                           TypeTable.get_type_name(rhs_type)))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Types {} and {} are not compatible for assignment, line {}'.format(
+                TypeTable.get_type_name(lhs_type),
+                TypeTable.get_type_name(rhs_type), line) + '\033[0m'
 
     # Visit a parse tree produced by HelloParser#routineCall.
     def visitRoutineCall(self, ctx):
@@ -181,10 +201,14 @@ class SemanticAnalyser(HelloVisitor):
         #  check if calling print
         if routine_name == 'print':
             if len(ctx.children) > 4:
-                raise Exception('Print function can only accept one parameter')
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Print function can only accept one parameter, line {}'.format(line) + '\033[0m'
             type_of_inner_expression = self.visitChildren(ctx.children[2])
             if type_of_inner_expression not in PrimitiveType.types.values():
-                raise Exception('Parameter for print can only be of primitive type')
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Parameter for print can only be of primitive type, line {}'.format(line) + '\033[0m'
             TypeTable.add_aux_type(type_of_inner_expression)
             return
 
@@ -193,7 +217,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if routine was defined
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
-            raise Exception('Routine {} is not defined'.format(routine_name))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Routine {} is not defined, line {}'.format(routine_name, line) + '\033[0m'
 
         #  constructing routine call argument list
         arguments = []
@@ -205,16 +231,21 @@ class SemanticAnalyser(HelloVisitor):
         if routine_parameters is None and len(arguments) == 0:
             return return_type
         elif (routine_parameters is None and len(arguments) > 0) or (len(routine_parameters) != len(arguments)):
-            raise Exception("Wrong number of arguments in routine call {}".format(routine_name))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + "Wrong number of arguments in routine call {}, line {}".format(routine_name,
+                                                                                              line) + '\033[0m'
 
         #  check argument types and parameter types compatibility
-        for p, a in zip(routine_parameters, arguments):
-            argument_type = self.visitExpression(a)
-            if not TypeUtils.are_compatible_for_assignment(p, argument_type):
-                raise Exception(
-                    'Parameter of type {} and argument of type {} are not compatible in {} routine call'.format(
+        if routine_parameters is not None:
+            for p, a in zip(routine_parameters, arguments):
+                argument_type = self.visitExpression(a)
+                if not TypeUtils.are_compatible_for_assignment(p, argument_type):
+                    line = ctx.start.line
+                    self.warning_counter += 1
+                    print '\033[91m' + 'Parameter of type {} and argument of type {} are not compatible in {} routine call, line {}'.format(
                         TypeTable.get_type_name(p),
-                        TypeTable.get_type_name(argument_type), routine_name))
+                        TypeTable.get_type_name(argument_type), routine_name, line) + '\033[0m'
         return return_type
 
     # Visit a parse tree produced by HelloParser#whileLoop.
@@ -256,7 +287,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check range boundaries to be integers
         if start_type != PrimitiveType.integer or end_type != PrimitiveType.integer:
-            raise Exception('Range boundaries are not integer numbers')
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Range boundaries are not integer numbers, line {}'.format(line) + '\033[0m'
 
     # Visit a parse tree produced by HelloParser#ifStatement.
     def visitIfStatement(self, ctx):
@@ -270,7 +303,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if condition to be boolean
         if self.visitExpression(expression) != PrimitiveType.boolean:
-            raise Exception("Condition of if statement is not boolean")
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + "Condition of if statement is not boolean, line {}".format(line) + '\033[0m'
 
         #  visit if body
         self.visitBody(children[3])
@@ -301,7 +336,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if routine with this name already exists
         if self.current_symbol_table.routine_defined_in_scope(identifier):
-            raise Exception('Routine {} is already defined'.format(identifier))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Routine {} is already defined, line {}'.format(identifier, line) + '\033[0m'
 
         #  create a new scope for routine
         self.current_symbol_table = self.current_symbol_table.create_child_scope(identifier)
@@ -324,11 +361,15 @@ class SemanticAnalyser(HelloVisitor):
         if routine_return_type is not None:
             return_type = self.visitLang_type(routine_return_type)
             if return_expression is None:
-                raise Exception("Routine must have a return statement")
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + "Routine must have a return statement, line {}".format(line) + '\033[0m'
         else:
             return_type = None
             if return_expression is not None:
-                raise Exception("Routine has no return type")
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + "Routine has no return type, line {}".format(line) + '\033[0m'
 
         #  add routine to the scope
         self.current_symbol_table.parent_scope.add_routine(identifier, parameters_list, return_type)
@@ -341,7 +382,10 @@ class SemanticAnalyser(HelloVisitor):
         if return_expression is not None:
             expr_type = self.visitExpression(return_expression)
             if return_type != expr_type:
-                raise Exception("Return type must be {}".format(TypeTable.get_type_name(return_type)))
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + "Return type must be {}, line {}".format(TypeTable.get_type_name(return_type),
+                                                                            line) + '\033[0m'
 
         #  returning to higher scope
         self.current_symbol_table = self.current_symbol_table.parent_scope
@@ -358,7 +402,9 @@ class SemanticAnalyser(HelloVisitor):
 
         #  chech is parameter with this name is already defined
         if self.current_symbol_table.is_defined_in_current_scope(identifier):
-            raise Exception('Parameter with name {} is already defined'.format(identifier))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Parameter with name {} is already defined, line {}'.format(identifier, line) + '\033[0m'
 
         #  add variable to current scope
         self.current_symbol_table.add_variable(identifier, lang_type)
@@ -377,7 +423,10 @@ class SemanticAnalyser(HelloVisitor):
         if len(children) <= 1:
             expression_type = self.visitRelation(children[0])
             if expression_type is None:
-                raise Exception("Attempt to call a routine, which doesn't return anything")
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + "Attempt to call a routine, which doesn't return anything, line {}".format(
+                    line) + '\033[0m'
             return expression_type
 
         #  if both relations are present get their types
@@ -386,8 +435,10 @@ class SemanticAnalyser(HelloVisitor):
 
         #  check if both are boolean
         if left_type != PrimitiveType.boolean or right_type != PrimitiveType.boolean:
-            raise Exception('Incompatible types {} and {} in expression, can be applied to boolean only'.format(
-                TypeTable.get_type_name(left_type), TypeTable.get_type_name(right_type)))
+            line = ctx.start.line
+            self.warning_counter += 1
+            print '\033[91m' + 'Incompatible types {} and {} in expression, can be applied to boolean only, line {}'.format(
+                TypeTable.get_type_name(left_type), TypeTable.get_type_name(right_type), line) + '\033[0m'
 
         #  return expression type
         expression_type = PrimitiveType.boolean
@@ -500,7 +551,9 @@ class SemanticAnalyser(HelloVisitor):
             identifier = self.unicode_to_str(children[0].getText())
             #  check if variable was declared
             if not self.current_symbol_table.is_defined_in_scope(identifier):
-                raise Exception('Variable {} is not defined'.format(identifier))
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Variable {} is not defined, line {}'.format(identifier, line) + '\033[0m'
             #  return type of the variable from the symbol table
             return self.current_symbol_table.get_variable_info(identifier).variable_type
         #  if modifiable primary is a array identifier
@@ -508,7 +561,10 @@ class SemanticAnalyser(HelloVisitor):
             array_identifier = self.unicode_to_str(children[0].getText())
             #  check if array was declared
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
-                raise Exception('Array with name {} is not defined'.format(array_identifier))
+                line = ctx.start.line
+                self.warning_counter += 1
+                print '\033[91m' + 'Array with name {} is not defined, line {}'.format(array_identifier,
+                                                                                       line) + '\033[0m'
             #  return type of the array from the symbol table
             return TypeTable.get_type(
                 self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
@@ -520,15 +576,22 @@ class SemanticAnalyser(HelloVisitor):
                     identifier = self.unicode_to_str(children[i].getText())
                     # check that the first identifier is a declared variable with type record
                     if i == 0 and not self.current_symbol_table.is_defined_in_scope(identifier):
-                        raise Exception('Record with name {} is not defined'.format(identifier))
+                        line = ctx.start.line
+                        self.warning_counter += 1
+                        print '\033[91m' + 'Record with name {} is not defined, line {}'.format(identifier,
+                                                                                                line) + '\033[0m'
                     record_calls.append(identifier)
             #  check validity of field calls
             type_id = self.current_symbol_table.get_variable_info(record_calls[0]).variable_type
             current_type = self.type_table.table[type_id]
             for i in range(len(record_calls) - 1):
                 if record_calls[i + 1] not in current_type.inner_declarations.keys():
-                    raise Exception(
-                        "Record {} doesn't have a field {}".format(record_calls[i], record_calls[i + 1]))
+                    line = ctx.start.line
+                    self.warning_counter += 1
+                    print '\033[91m' + "Record {} doesn't have a field {}, line {}".format(record_calls[i],
+                                                                                           record_calls[i + 1],
+                                                                                           line) + '\033[0m'
+
                 type_id = current_type.inner_declarations[record_calls[i + 1]]
                 current_type = self.type_table.table[type_id]
             return type_id
