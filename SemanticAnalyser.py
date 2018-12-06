@@ -60,7 +60,7 @@ class SemanticAnalyser(HelloVisitor):
         final_type = lang_type
 
         #  check if the variable was already defined in the current scope
-        if self.current_symbol_table.is_defined_in_current_scope(identifier):
+        if self.current_symbol_table.is_defined_in_local_scope(identifier):
             line = ctx.start.line
             self.warning_counter += 1
             print '\033[91m' + 'Variable {} is already defined at line {}'.format(identifier, line) + '\033[0m'
@@ -214,14 +214,15 @@ class SemanticAnalyser(HelloVisitor):
             TypeTable.add_aux_type(type_of_inner_expression)
             return
 
-        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
-        routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
         #  check if routine was defined
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
             line = ctx.start.line
             self.warning_counter += 1
             print '\033[91m' + 'Routine {} is not defined, line {}'.format(routine_name, line) + '\033[0m'
+
+        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+        routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
         #  constructing routine call argument list
         arguments = []

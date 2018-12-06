@@ -103,6 +103,14 @@ class SymbolTable:
         else:
             return True
 
+    def is_defined_in_local_scope(self, variable_name):
+        """
+        :param variable_name:
+        :return: whether variable is defined in current scope (scopes of if, while and for are considered
+                 to be in the same scope of routine)
+        """
+        return variable_name in self.scope.keys()
+
     def is_defined_in_current_scope(self, variable_name):
         """
         :param variable_name:
