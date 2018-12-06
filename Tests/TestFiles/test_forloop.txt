@@ -17,14 +17,3 @@ routine bubble_sort(b: sorting_array_type) is
         end
      end
 end;
-
-routine start(param1: integer, param2: integer, param3: integer) is
-    var b : array[3] integer
-    b[1] := param1
-    b[2] := param2
-    b[3] := param3
-    bubble_sort(b)
-    print(b[1])
-    print(b[2])
-    print(b[3])
-end;

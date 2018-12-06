@@ -25,8 +25,8 @@ class TestCCodeGen(TestCase):
     # def test_visitSimpleDeclaration(self):
     #     self.fail()
     #
-    # def test_visitVariableDeclaration(self):
-    #     self.fail()
+    def test_visitVariableDeclaration(self):
+        self.fail()
     #
     # def test_getVariableType(self):
     #     self.fail()
@@ -58,23 +58,23 @@ class TestCCodeGen(TestCase):
     # def test_visitAssignment(self):
     #     self.fail()
     #
-    # def test_visitRoutineCall(self):
-    #     self.fail()
-    #
-    # def test_visitWhileLoop(self):
-    #     self.fail()
-    #
-    # def test_visitForLoop(self):
-    #     self.fail()
-    #
+    def test_visitRoutineCall(self):
+        self.fail()
+
+    def test_visitWhileLoop(self):
+        self.fail()
+
+    def test_visitForLoop(self):
+        self.fail()
+
     # def test_visitLang_range(self):
     #     self.fail()
     #
     # def test_visitIfStatement(self):
     #     self.fail()
     #
-    # def test_visitRoutineDeclaration(self):
-    #     self.fail()
+    def test_visitRoutineDeclaration(self):
+        self.fail()
     #
     # def test_visitParameters(self):
     #     self.fail()
@@ -82,14 +82,14 @@ class TestCCodeGen(TestCase):
     # def test_visitParameterDeclaration(self):
     #     self.fail()
     #
-    # def test_visitBody(self):
-    #     self.fail()
+    def test_visitBody(self):
+        self.fail()
     #
     # def test_expressionToString(self):
     #     self.fail()
     #
-    # def test_visitExpression(self):
-    #     self.fail()
+    def test_visitExpression(self):
+        self.fail()
     #
     # def test_visitRelation(self):
     #     self.fail()
