@@ -188,12 +188,13 @@ class SemanticAnalyser(HelloVisitor):
             TypeTable.add_aux_type(type_of_inner_expression)
             return
 
-        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
-        routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
         #  check if routine was defined
         if not self.current_symbol_table.routine_defined_in_scope(routine_name):
             raise Exception('Routine {} is not defined'.format(routine_name))
+
+        return_type = self.current_symbol_table.get_routine_info(routine_name).return_type
+        routine_parameters = self.current_symbol_table.get_routine_info(routine_name).parameters
 
         #  constructing routine call argument list
         arguments = []
