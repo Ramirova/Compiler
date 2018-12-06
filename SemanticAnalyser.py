@@ -1,6 +1,8 @@
 import sys
 import warnings
 
+import sys
+
 from lexical_and_syntax_analysis.HelloVisitor import HelloVisitor
 from SymbolTable import SymbolTable
 from lexical_and_syntax_analysis.HelloParser import HelloParser
@@ -166,17 +168,17 @@ class SemanticAnalyser(HelloVisitor):
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
 
-        lhs_name = self.unicode_to_str(ctx.children[0].getText())
-
+        lhs_name = self.unicode_to_str(ctx.children[0].children[0].getText())
         if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
             line = ctx.start.line
             self.warning_counter += 1
             print '\033[91m' + 'Variable {} cannot be modified, line {}'.format(lhs_name, line) + '\033[0m'
 
         #  checking assignment types compatibility
-        if TypeTable.get_type_name(lhs_type) == 'ArrayType':
+        if TypeTable.get_type(self.current_symbol_table.get_variable_info(lhs_name).variable_type).__class__.__name__\
+                == 'ArrayType':
             #  if trying to assign incompatible type to an array element
-            if TypeTable.table[lhs_type].nested_type_id != rhs_type:
+            if lhs_type != rhs_type:
                 line = ctx.start.line
                 self.warning_counter += 1
                 print '\033[91m' + 'Cannot assign {} to array with elements of type {}, line {}'.format(
@@ -565,6 +567,9 @@ class SemanticAnalyser(HelloVisitor):
                 self.warning_counter += 1
                 print '\033[91m' + 'Array with name {} is not defined, line {}'.format(array_identifier,
                                                                                        line) + '\033[0m'
+            if not self.visitExpression(children[2]) == PrimitiveType.integer:
+                raise Exception('Elements of array can only be accessed with integer indexes')
+
             #  return type of the array from the symbol table
             return TypeTable.get_type(
                 self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
