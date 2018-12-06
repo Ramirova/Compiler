@@ -286,7 +286,7 @@ class CCodeGen(HelloVisitor):
             left_type = self.current_scope.scope[left_side].variable_type
         if right_side in self.current_scope.scope:
             right_type = self.current_scope.scope[right_side].variable_type
-        if left_type in self.prinf_type_map:
+        if left_type in self.primitive_type_map:
             if "(" in right_side or (left_type in self.primitive_type_map and left_type != right_type):
                 cast_type = "(" + self.primitive_type_map[left_type] + ")"
         self.current_queue.append(
@@ -405,7 +405,7 @@ class CCodeGen(HelloVisitor):
                 name = arg.split(":")[0]
                 type = ""
                 if scope_parameters[counter] in self.primitive_type_map.keys():
-                    args += self.prinf_type_map[scope_parameters[counter]] + " " + name + ", "
+                    args += self.primitive_type_map[scope_parameters[counter]] + " " + name + ", "
                 elif scope_parameters[counter] in AliasType.table.values():
                     c_type = ""
                     for key, value in AliasType.table.items():
@@ -416,7 +416,7 @@ class CCodeGen(HelloVisitor):
                         c_type += "_type"
                     if scope_parameters[counter] in TypeTable.table.keys() and isinstance(TypeTable.table[scope_parameters[counter]], ArrayType):
                         c_type += "*"
-                    args += c_type + " " + name + ", "
+                    args += " " + c_type + " " + name + ", "
                     print(args)
                 else:
                     type_id = self.current_scope.scope[name.encode('ascii', 'ignore')].variable_type
@@ -433,8 +433,8 @@ class CCodeGen(HelloVisitor):
         if scope_return is not None:#If there are no arguments, but there is return type
             # return_type = self.c_type_map[ctx.children[3].getText()]
             return_type_id = scope_return
-            if return_type_id in self.prinf_type_map.keys():
-                return_type = self.prinf_type_map[return_type_id]
+            if return_type_id in self.primitive_type_map.keys():
+                return_type = self.primitive_type_map[return_type_id]
             if return_type_id in AliasType.table.values():
                 print(AliasType.table)
                 for key, value in AliasType.table.items():  # for name, age in dictionary.iteritems():  (for Python 2.x)
@@ -450,7 +450,7 @@ class CCodeGen(HelloVisitor):
                     return_type = "struct routine_return_" + str(len(self.routines))
                     self.do_not_visit_record_declaration = True
                 if isinstance(TypeTable.table[return_type_id], ArrayType):
-                    return_type = "*" + self.c_type_map[self.getRoutineReturnType(return_type_id)[1]]
+                    return_type = self.c_type_map[self.getRoutineReturnType(return_type_id)[1]] + "* "
         if args is not "":
             args = args[:-2]
         routine_declaration = return_type + " " + ctx.children[1].getText() + "(" + args + ")" + " {\n"
@@ -519,7 +519,7 @@ class CCodeGen(HelloVisitor):
         :return: string with expression in C
         """
         return ctx.getText().replace("and", "&&").replace("xor", "^").replace("/=", "!=").replace("or", "||").replace(
-            "=", "==").encode('ascii', 'ignore')
+            "=", "==").replace("<==", "<=").encode('ascii', 'ignore')
 
     def visitRelation(self, ctx):
         """

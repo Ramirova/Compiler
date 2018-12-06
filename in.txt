@@ -1,4 +1,32 @@
-routine print_numbers(start_range: integer, end_range: integer) is
-    for i in start_range..end_range loop print(i) end
+var arr : array[5] integer;
+
+
+routine insertion_sort(a : array[5] integer) is
+    var start_loop : integer is 1
+    var end_loop : integer is 5
+    for i in start_loop..end_loop loop
+        var x is a[i]
+        var j is i
+            while j > 1 and a[j - 1] > x loop
+                a[j] := a[j - 1]
+                j := j - 1
+            end
+        a[j] := x
+     end
 end;
+
+
+routine init_and_start(e1 : integer, e2: integer, e3: integer, e4: integer, e5: integer) is
+    arr[1] := e1
+    arr[2] := e2
+    arr[3] := e3
+    arr[4] := e4
+    arr[5] := e5
+    insertion_sort(arr)
+    print(arr[1])
+    print(arr[2])
+    print(arr[3])
+    print(arr[4])
+    print(arr[5])
+    end;
 
