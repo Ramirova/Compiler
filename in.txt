@@ -1,4 +1,31 @@
-routine print_numbers(start_range: integer, end_range: integer) is
-    for i in start_range..end_range loop print(i) end
+type sorting_array_type is array[3] integer;
+var my_array : sorting_array_type;
+
+routine bubble_sort is
+    var e1 : integer is 3
+    var e2 : integer is 2
+    var e3 : integer is 1
+    var b : array[3] integer
+    b[2] := e2
+    b[3] := e3
+    var start_loop : integer is 1
+    var end_loop : integer is 3
+    var start_second_loop : integer is 1
+    var end_second_loop : integer is 3
+    var flag : integer is 1
+    var temp : integer is 0
+    for j in start_loop..end_loop loop
+        for i in start_second_loop..(end_second_loop-j) loop
+            if b[i] > b[i + 1] then
+                temp := b[i]
+                b[i] := b[i + 1]
+                b[i + 1] := temp
+                flag := 2
+                end
+        end
+     end
 end;
 
+routine init_and_start(param: integer) is
+    bubble_sort()
+end;

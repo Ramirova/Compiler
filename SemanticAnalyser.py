@@ -51,7 +51,7 @@ class SemanticAnalyser(HelloVisitor):
         final_type = lang_type
 
         #  check if the variable was already defined in the current scope
-        if self.current_symbol_table.is_defined_in_current_scope(identifier):
+        if self.current_symbol_table.is_defined_in_local_scope(identifier):
             raise Exception('Variable {} is already defined'.format(identifier))
 
         #  deduce type from expression if no explicit type was specified
@@ -152,18 +152,18 @@ class SemanticAnalyser(HelloVisitor):
         lhs_type = self.visitModifiablePrimary(lhs)
         rhs_type = self.visitExpression(rhs)
 
-        lhs_name = self.unicode_to_str(ctx.children[0].getText())
-
+        lhs_name = self.unicode_to_str(ctx.children[0].children[0].getText())
         if not self.current_symbol_table.get_variable_info(lhs_name).modifiable:
             raise Exception('variable {} cannot be modified'.format(lhs_name))
 
         #  checking assignment types compatibility
-        if TypeTable.get_type_name(lhs_type) == 'ArrayType':
+        if TypeTable.get_type(self.current_symbol_table.get_variable_info(lhs_name).variable_type).__class__.__name__\
+                == 'ArrayType':
             #  if trying to assign incompatible type to an array element
-            if TypeTable.table[lhs_type].nested_type_id != rhs_type:
+            if lhs_type != rhs_type:
                 raise Exception(
-                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(lhs_type),
-                                                                                TypeTable.get_type_name(rhs_type)))
+                    'Cannot assign {} to array with elements of type {}'.format(TypeTable.get_type_name(rhs_type),
+                                                                                TypeTable.get_type_name(lhs_type)))
             else:
                 return self.visitChildren(ctx)
         #  check for assignment of real to boolean
@@ -509,6 +509,9 @@ class SemanticAnalyser(HelloVisitor):
             #  check if array was declared
             if not self.current_symbol_table.is_defined_in_scope(array_identifier):
                 raise Exception('Array with name {} is not defined'.format(array_identifier))
+            # check that the expression in the subscript is integer
+            if not self.visitExpression(children[2]) == PrimitiveType.integer:
+                raise Exception('Elements of array can only be accessed with integer indexes')
             #  return type of the array from the symbol table
             return TypeTable.get_type(
                 self.current_symbol_table.get_variable_info(array_identifier).variable_type).nested_type_id
