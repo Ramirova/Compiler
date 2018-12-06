@@ -1,3 +1,3 @@
-routine plus(a: integer, b: integer): integer is
+routine plus_whileloop(a: integer, b: integer) is
     while a < b loop a := a + 1 end
 end;

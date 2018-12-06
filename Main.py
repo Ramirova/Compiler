@@ -23,6 +23,7 @@ def main():
     print("Semantic analysis is done...\n")
     visitor = CCodeGen()
     visitor.visit(tree)
+    print(visitor.queue)
     makefile = C_makefile(visitor.type_def_queue, visitor.queue, visitor.routines, visitor.main_allocs)
     makefile.make_file()
 

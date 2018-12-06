@@ -1,8 +1,8 @@
-routine plus(a: integer, b: integer): integer is
+routine plus_int(a: integer, b: integer): integer is
     return a + b
 end;
 
 routine calculator(a: integer, b: integer) is
-    var res1 is plus(a, b)
+    var res1 is plus_int(a, b)
     print(res1)
 end;

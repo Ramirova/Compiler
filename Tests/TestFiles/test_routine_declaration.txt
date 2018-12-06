@@ -2,7 +2,3 @@ routine print_numbers(start_range: integer, end_range: integer) is
     for i in start_range..end_range loop print(i) end
 end;
 
-routine print_numbers_reverse(start_range: integer, end_range: integer) is
-    for i in reverse start_range..end_range loop print(i) end
-end;
-

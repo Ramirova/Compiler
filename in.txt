@@ -1,7 +1,4 @@
-routine a: record var i is 0 end is
-    var result : array[3] integer
-    var res : record var i is 0 end
-    return res
-    end;
-
+routine print_numbers(start_range: integer, end_range: integer) is
+    for i in start_range..end_range loop print(i) end
+end;
 

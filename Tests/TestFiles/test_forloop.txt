@@ -8,12 +8,6 @@ routine bubble_sort(b: sorting_array_type) is
     var end_second_loop : integer is 3
     var temp : integer is 0
     for j in start_loop..end_loop loop
-        for i in start_second_loop..(end_second_loop-j) loop
-            if b[i] > b[i + 1] then
-                temp := b[i]
-                b[i] := b[i + 1]
-                b[i + 1] := temp
-                end
-        end
-     end
+        var a is 0
+    end
 end;
